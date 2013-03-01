@@ -1,0 +1,11 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    redis (3.0.3)
+
+PLATFORMS
+  java
+  ruby
+
+DEPENDENCIES
+  redis
