@@ -1,10 +1,13 @@
 require 'java'
 require 'redis'
 require 'uri'
-# require_relative 'GPT.jar'
+# require 'active_support/core_ext/numeric'
+
+# require_relative 'json-simple-1.1.1.jar'
+
 scriptloc = File.expand_path(File.dirname(__FILE__))
 
-$CLASSPATH << "#{scriptloc}"
+$CLASSPATH << "#{scriptloc}s"
 $CLASSPATH << "#{scriptloc}/json-simple-1.1.1.jar"
 java_import "EventHandler"
 
@@ -66,12 +69,12 @@ class ServerWrapper
   end
 
   def read_queue
-    @red.brpop("toJava")[1]
+    @red.brpop("toJava", 120)[1] #
   end
 
   def sleepmode
     while (!(poppy = @red.bpop))
-      sleep (1.minute)
+      sleep (60)
     end
   end
 
