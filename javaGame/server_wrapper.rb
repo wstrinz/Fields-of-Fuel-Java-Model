@@ -71,7 +71,13 @@ class ServerWrapper
   def read_queue
     ret = nil
     until ret
-      ret = @red.brpop("toJava", 120)
+      begin
+        ret = @red.brpop("toJava", 120)
+      rescue
+        puts "couldn't connect to redis, retrying"
+        uri = URI.parse("redis://redistogo:1f736fa2a27319dc45b7ebb470e04bbe@dory.redistogo.com:10177/")
+        @red = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
+      end
       # unless ret
       #   puts "timeout, retrying"
       # end
