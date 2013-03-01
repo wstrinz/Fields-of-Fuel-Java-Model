@@ -1,3 +1,5 @@
+import java.util.Random;
+
 
 public class Field {
 
@@ -7,9 +9,17 @@ public class Field {
   private ManagementOptions management;
 
   public Field() {
-    setCrop(Crop.CORN);
+    setCrop(randomCrop());
     management = new ManagementOptions();
     // TODO Auto-generated constructor stub
+  }
+
+  private Crop randomCrop() {
+    // TODO Auto-generated method stub
+    Random r = new Random();
+    if(r.nextInt(2)==0)
+      return Crop.CORN;
+    return Crop.GRASS;
   }
 
   private class ManagementOptions{

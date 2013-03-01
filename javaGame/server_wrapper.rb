@@ -69,7 +69,14 @@ class ServerWrapper
   end
 
   def read_queue
-    @red.brpop("toJava", 120)[1] #
+    ret = nil
+    until ret
+      ret = @red.brpop("toJava", 120)
+      # unless ret
+      #   puts "timeout, retrying"
+      # end
+    end
+    ret[1] #
   end
 
   def sleepmode

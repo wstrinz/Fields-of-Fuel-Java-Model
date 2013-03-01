@@ -23,17 +23,17 @@ public class Game {
   }
 
 
-  public Game(String name, long l) {
+  public Game(String name, long maxPlayers) {
     roomName = name;
     farms = new ConcurrentHashMap<>();
     hasPassword = false;
     password = "";
     roundManager = new RoundManager(false, false);
-    this.maxPlayers = l;
+    this.maxPlayers = maxPlayers;
     // TODO Auto-generated constructor stub
   }
 
-  public Game(String name, String pass, int maxPlayers) {
+  public Game(String name, String pass, long maxPlayers) {
     roomName = name;
     farms = new ConcurrentHashMap<>();
     hasPassword = true;
@@ -48,7 +48,11 @@ public class Game {
 
   public boolean hasFarmer(String name) {
     // TODO Auto-generated method stub
-    return farms.get(name)!=null;
+    for(Farm f:farms.values()){
+      if (f.getName().equals(name))
+        return true;
+    }
+    return false;
   }
 
   /*public void addFarmer(String newPlayer) {

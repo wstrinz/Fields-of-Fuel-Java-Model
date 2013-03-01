@@ -16,7 +16,7 @@ public class Farm {
     this.name = name;
     this.capital = capital;
     fields = new Field[2];
-    fields[0].setCrop(Crop.GRASS);
+//    fields[0].setCrop(Crop.GRASS);
     // TODO Auto-generated constructor stub
   }
 
@@ -81,7 +81,10 @@ public class Farm {
   public boolean isAcceptSwitchgrassContract() {
     return acceptSwitchgrassContract;
   }
+
   public void setAcceptSwitchgrassContract(boolean acceptSwitchgrassContract) {
     this.acceptSwitchgrassContract = acceptSwitchgrassContract;
   }
+
+
 }
