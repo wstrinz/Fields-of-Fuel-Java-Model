@@ -1,79 +1,87 @@
-import java.util.Random;
+
+public class Farm {
+
+  private String name;
+  private int clientID;
+  private Field[] fields;
+  private int capital;
+  private int envScore;
+  private int socScore;
+  private int econScore;
+  private boolean acceptCornContract;
+  private boolean acceptSwitchgrassContract;
 
 
-public class Field {
-
-
-
-  private Crop crop;
-  private ManagementOptions management;
-
-  public Field() {
-    setCrop(randomCrop());
-    management = new ManagementOptions();
+  public Farm(String name, int capital) {
+    this.name = name;
+    this.capital = capital;
+    fields = new Field[2];
+    fields[0].setCrop(Crop.GRASS);
     // TODO Auto-generated constructor stub
   }
 
-  private Crop randomCrop() {
-    // TODO Auto-generated method stub
-    Random r = new Random();
-    if(r.nextInt(2)==0)
-      return Crop.CORN;
-    return Crop.GRASS;
+  public Field[] getFields(){
+    return fields;
   }
 
-  private class ManagementOptions{
-
-    public ManagementOptions(boolean ... opts){
-      if(opts.length > 0)
-        till = opts[0];
-      if(opts.length > 1)
-        pesticide = opts[1];
-      if(opts.length > 2)
-        fertilize = opts[2];
-    }
-
-    private boolean till;
-    private boolean pesticide;
-    private boolean fertilize;
+  public void recomputeScores(){
+    this.econScore = calcEconScore();
+    this.envScore = calcEnvScore();
+    this.socScore = calcSocScore();
   }
 
-  public Crop getCrop() {
-    return crop;
+  public int getEnvScore() {
+    return envScore;
   }
 
-  public void setCrop(Crop crop) {
-    this.crop = crop;
+  public int calcEnvScore() {
+    return this.envScore;
   }
 
-  public boolean isTill() {
-    return management.till;
-  }
-  public void setTill(boolean till) {
-    management.till = till;
+  public int getCapital() {
+    return capital;
   }
 
-  public boolean isPesticide() {
-    return management.pesticide;
+  public int getSocScore() {
+    return socScore;
   }
 
-  public void setPesticide(boolean pesticide) {
-    management.pesticide = pesticide;
+  public int calcSocScore() {
+    return this.socScore;
   }
 
-  public boolean isFertilize() {
-    return management.fertilize;
-  }
-  public void setFertilize(boolean fertilize) {
-    management.fertilize = fertilize;
-  }
-  public ManagementOptions getManagement() {
-    return management;
+  public int getEconScore() {
+    return econScore;
   }
 
-  public void setManagement(ManagementOptions management) {
-    this.management = management;
+  public int calcEconScore() {
+    return this.econScore;
   }
 
+  public String getName() {
+    return name;
+  }
 
+  public int getClientID() {
+    return clientID;
+  }
+
+  public void setClientID(int clientID) {
+    this.clientID = clientID;
+  }
+
+  public boolean isAcceptCornContract() {
+    return acceptCornContract;
+  }
+
+  public void setAcceptCornContract(boolean acceptCornContract) {
+    this.acceptCornContract = acceptCornContract;
+  }
+
+  public boolean isAcceptSwitchgrassContract() {
+    return acceptSwitchgrassContract;
+  }
+  public void setAcceptSwitchgrassContract(boolean acceptSwitchgrassContract) {
+    this.acceptSwitchgrassContract = acceptSwitchgrassContract;
+  }
 }

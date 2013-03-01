@@ -1,1 +1,1 @@
-web: ruby javaGame/server_runner.rb
+web: ./run.sh
