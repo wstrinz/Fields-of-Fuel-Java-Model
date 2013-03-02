@@ -1,14 +1,19 @@
+scriptloc = File.expand_path(File.dirname(__FILE__))
+$CLASSPATH << "#{scriptloc}"
+$CLASSPATH << "#{scriptloc}/json-simple-1.1.1.jar"
+$CLASSPATH << "#{scriptloc}/FoFModel.jar"
+
 require 'java'
 require 'redis'
 require 'uri'
+require 'json-simple-1.1.1.jar'
+require 'FoFModel.jar'
+
 # require 'active_support/core_ext/numeric'
 
 # require_relative 'json-simple-1.1.1.jar'
 
-scriptloc = File.expand_path(File.dirname(__FILE__))
 
-$CLASSPATH << "#{scriptloc}s"
-$CLASSPATH << "#{scriptloc}/json-simple-1.1.1.jar"
 java_import "EventHandler"
 
 class ServerWrapper
@@ -22,8 +27,8 @@ class ServerWrapper
       puts @wpipe = open(File.join(scriptloc, "../pipes/javapipe"),'w+')
     else
       puts 'connecting to redis server'
-      uri = URI.parse("redis://redistogo:1f736fa2a27319dc45b7ebb470e04bbe@dory.redistogo.com:10177/")
-      @red = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
+      @uri = URI.parse("redis://redistogo:1f736fa2a27319dc45b7ebb470e04bbe@dory.redistogo.com:10177/")
+      @red = Redis.new(:host => @uri.host, :port => @uri.port, :password => @uri.password)
     end
     # puts "connected to redis #{@red}"
 
@@ -75,8 +80,8 @@ class ServerWrapper
         ret = @red.brpop("toJava", 120)
       rescue
         puts "couldn't connect to redis, retrying"
-        uri = URI.parse("redis://redistogo:1f736fa2a27319dc45b7ebb470e04bbe@dory.redistogo.com:10177/")
-        @red = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
+        #uri = URI.parse("redis://redistogo:1f736fa2a27319dc45b7ebb470e04bbe@dory.redistogo.com:10177/")
+        @red = Redis.new(:host => @uri.host, :port => @uri.port, :password => @uri.password)
       end
       # unless ret
       #   puts "timeout, retrying"
