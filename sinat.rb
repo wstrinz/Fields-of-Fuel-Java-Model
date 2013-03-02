@@ -5,5 +5,8 @@ get '/hi' do
 end
 
 get '/start' do
-    `. run.sh`
+  Thread.new do
+    puts load('javaGame/server_runner.rb')
+  end
+  "Started server. Don't go running this twice now..."
 end
