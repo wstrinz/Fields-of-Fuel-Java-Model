@@ -5,7 +5,5 @@ get '/hi' do
 end
 
 get '/start' do
-  Process.spawn do
     `. run.sh`
-  end
 end
