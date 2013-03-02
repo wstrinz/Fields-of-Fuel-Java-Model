@@ -1,1 +1,1 @@
-web: . run.sh
+web: bundle exec ruby sinat.rb -p $PORT
