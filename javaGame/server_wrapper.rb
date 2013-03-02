@@ -77,7 +77,7 @@ class ServerWrapper
     ret = nil
     until ret
       begin
-        ret = @red.brpop("toJava", 120)
+        ret = @red.brpop("toJava")
       rescue
         puts "couldn't connect to redis, retrying"
         #uri = URI.parse("redis://redistogo:1f736fa2a27319dc45b7ebb470e04bbe@dory.redistogo.com:10177/")
