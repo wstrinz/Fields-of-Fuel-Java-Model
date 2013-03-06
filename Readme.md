@@ -1,4 +1,4 @@
-Biofuel Game Server
+Biofuel Game Model
 ===================
 
 Separated from the main project since it can be run as a separate process. First, build the server with maven
