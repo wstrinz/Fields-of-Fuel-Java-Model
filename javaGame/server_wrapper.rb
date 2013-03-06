@@ -1,23 +1,30 @@
 scriptloc = File.expand_path(File.dirname(__FILE__))
 $CLASSPATH << "#{scriptloc}"
 $CLASSPATH << "#{scriptloc}/json-simple-1.1.1.jar"
-$CLASSPATH << "#{scriptloc}/FoFModel.jar"
+$CLASSPATH << "#{scriptloc}/akka-actor_2.10-2.1.1.jar"
+$CLASSPATH << "#{scriptloc}/kosomodel/target/kosomodel-0.0.1-SNAPSHOT"
 
 require 'java'
 require 'redis'
 require 'uri'
 require 'json-simple-1.1.1.jar'
-require 'FoFModel.jar'
+# require 'FoFModel.jar'
+require 'kosomodel/target/kosomodel-0.0.1-SNAPSHOT.jar'
+require 'akka_helper'
 
 # require 'active_support/core_ext/numeric'
 
 # require_relative 'json-simple-1.1.1.jar'
 
 
-java_import "EventHandler"
+java_import "com.biofuels.fof.kosomodel.Handler"
+java_import "com.biofuels.fof.kosomodel.EventMessage"
+java_import "com.biofuels.fof.kosomodel.ActorSystemHelper"
+
+
+include AkkaHelper
 
 class ServerWrapper
-
 
   def open_pipes(mode)
     scriptloc = File.expand_path(File.dirname(__FILE__))
@@ -31,10 +38,7 @@ class ServerWrapper
       @red = Redis.new(:host => @uri.host, :port => @uri.port, :password => @uri.password)
     end
     # puts "connected to redis #{@red}"
-
-
-
-    @event_handler = EventHandler.new
+    # @event_handler = EventHandler.new
   end
 
   def write_pipe(msg)
@@ -57,15 +61,25 @@ class ServerWrapper
         str = read_queue
       end
       puts "handling #{str}"
+      @handler.tell(EventMessage.new(str))
 
-      @event_handler.handle(str).each do |msg|
-        # puts "writing #{msg} back"
-        if mode=="pipe"
-          write_pipe(msg)
-        else
-          write_queue(msg)
-        end
-      end
+      # Future future = ask(counter, "get", 5000);
+
+      # future.onSuccess(OnSuccess.new() {
+      #       def onSuccess(result) {
+      #           puts("handled #{result}")
+      #           # System.out.println("Count is " + count);
+      #       }
+      #   }, @system.dispatcher());
+
+      # @event_handler.handle(str).each do |msg|
+      #   if mode=="pipe"
+      #     write_pipe(msg)
+      #   else
+      #     # write_queue(msg)
+      #     @listener.tell(EventMessage.new(msg))
+      #   end
+      # end
     end
   end
 
@@ -94,6 +108,17 @@ class ServerWrapper
     while (!(poppy = @red.bpop))
       sleep (60)
     end
+  end
+
+  def do_akka
+    jside = ActorSystemHelper.new
+    @system = ActorSystem.create("Biofuels")
+    # pro = Props.new(HandlerActor)
+    @handler = jside.makenew(@system, Handler, "handler")  # = system.actorOf(pro, "counter")
+    @listener = @system.actorOf(Props.new(ServerListener), "listener")
+    @listener.tell(ConnectMessage.new(URI.parse("redis://redistogo:1f736fa2a27319dc45b7ebb470e04bbe@dory.redistogo.com:10177/")))
+    @handler.tell(@listener)
+    watch('redis')
   end
 
 end
