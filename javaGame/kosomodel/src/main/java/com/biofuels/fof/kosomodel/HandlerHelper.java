@@ -42,14 +42,42 @@ public class HandlerHelper {
 
     case "validateRoom":
       if(games.get(roomName) != null){
-        listener.tell(new EventMessage(buildJson(clientID, "validateRoom", "result", false)));
-        //        replies.add("{\"event\":\"validateRoom\",\"result\":false}");
+        sendMessage(buildJson(clientID, "validateRoom", "result", false));
       }
       else{
-        //            System.out.println("j tell success " + event + " to " + listener);
-        listener.tell(new EventMessage(buildJson(clientID, "validateRoom", "result", true)));
-        //        replies.add("{\"event\":\"validateRoom\",\"result\":true}");
+        // System.out.println("j tell success " + event + " to " + listener);
+        sendMessage(buildJson(clientID, "validateRoom", "result", true));
       }
+      break;
+
+    case "globalValidateRoom":
+      boolean roomResult = false;
+      boolean needsPass = false;
+      boolean correctPass = false;
+      if(games.get(roomName) != null){
+        roomResult = true;
+        if(games.get(roomName).hasPassword()){
+          needsPass = true;
+          if(games.get(roomName).getPassword().equals(eventObj.get("password")))
+            correctPass = true;
+        }
+      }
+
+      sendMessage(buildJson(clientID, "globalValidateRoom","roomResult",roomResult,"needsPassword",needsPass,
+          "passwordResult",correctPass));
+      break;
+
+    case "globalJoinRoom":
+      boolean joinResult = false;
+      if(games.get(roomName) != null){
+        if(games.get(roomName).hasPassword()){
+          if(games.get(roomName).getPassword().equals(eventObj.get("password")))
+            joinResult = true;
+        }
+        else
+          joinResult = true;
+      }
+      sendMessage(buildJson(clientID, "globalJoinRoom","result",joinResult));
       break;
 
     case "changeSettings":
@@ -85,10 +113,10 @@ public class HandlerHelper {
             break;
 
     case "validateUserName":
-      boolean roomResult = (roomExists(roomName) && !games.get(roomName).isFull());
+       roomResult = (roomExists(roomName) && !games.get(roomName).isFull());
       boolean nameResult = false;
-      boolean needsPass = false;
-      boolean correctPass = false;
+       needsPass = false;
+       correctPass = false;
       if(roomResult){
         nameResult = !eventObj.get("userName").equals("") && !farmerExistsInRoom(farmerName, roomName);//!games.get(roomName).hasFarmer((String) eventObj.get(eventObj.get("userName")));
         needsPass = games.get(roomName).hasPassword();
