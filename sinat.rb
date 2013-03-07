@@ -5,7 +5,7 @@ configure do
 end
 
 get '/' do
-  "Biofuels Game Model \n If you just woke up the server, try '/start' to get the model running again"
+  "Biofuels Game Model Control \n If you just woke up the server, try '/start' to get the model running again"
 end
 
 get '/hi' do
