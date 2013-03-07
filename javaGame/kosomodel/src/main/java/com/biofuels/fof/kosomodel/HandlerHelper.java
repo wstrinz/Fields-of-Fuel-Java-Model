@@ -42,11 +42,11 @@ public class HandlerHelper {
 
     case "validateRoom":
       if(games.get(roomName) != null){
-        sendMessage(buildJson(clientID, "validateRoom", "result", false));
+        sendMessage(buildJson(clientID.toString(), "validateRoom", "result", false));
       }
       else{
         // System.out.println("j tell success " + event + " to " + listener);
-        sendMessage(buildJson(clientID, "validateRoom", "result", true));
+        sendMessage(buildJson(clientID.toString(), "validateRoom", "result", true));
       }
       break;
 
@@ -63,7 +63,7 @@ public class HandlerHelper {
         }
       }
 
-      sendMessage(buildJson(clientID, "globalValidateRoom","roomResult",roomResult,"needsPassword",needsPass,
+      sendMessage(buildJson(clientID.toString(), "globalValidateRoom","roomResult",roomResult,"needsPassword",needsPass,
           "passwordResult",correctPass));
       break;
 
@@ -77,7 +77,7 @@ public class HandlerHelper {
         else
           joinResult = true;
       }
-      sendMessage(buildJson(clientID, "globalJoinRoom","result",joinResult));
+      sendMessage(buildJson(clientID.toString(), "globalJoinRoom","result",joinResult));
       break;
 
     case "changeSettings":
@@ -95,8 +95,8 @@ public class HandlerHelper {
             }
             System.out.print("waking\n");*/;
             if(games.get(roomName) != null){
-              sendMessage(buildJson(clientID, "createRoom", "result", false));
-              sendMessage(buildJson(clientID, "createRoom", "result", false));
+              sendMessage(buildJson(clientID.toString(), "createRoom", "result", false));
+              sendMessage(buildJson(clientID.toString(), "createRoom", "result", false));
               //        replies.add("{\"event\":\"createRoom\",\"result\":false}");
             }
             else if(((String)eventObj.get("password")).length()>0){
@@ -108,7 +108,7 @@ public class HandlerHelper {
             else{
               games.put(roomName, new Game(roomName, (long)eventObj.get("playerCount")));
             }
-            sendMessage(buildJson(clientID, "createRoom","result",true));
+            sendMessage(buildJson(clientID.toString(), "createRoom","result",true));
             //replies.add("{\"event\":\"createRoom\",\"result\":true}");
             break;
 
@@ -124,7 +124,7 @@ public class HandlerHelper {
           correctPass = games.get(roomName).getPassword().equals(eventObj.get("password"));
         }
       }
-      sendMessage(buildJson(clientID, "validateUserName","roomResult",roomResult,"needsPassword",needsPass,
+      sendMessage(buildJson(clientID.toString(), "validateUserName","roomResult",roomResult,"needsPassword",needsPass,
           "passwordResult",correctPass,"userNameResult",nameResult));
       break;
 
@@ -149,10 +149,29 @@ public class HandlerHelper {
           && games.get(roomName).getPassword().equals(eventObj.get("password")))
       {
         games.get(roomName).addFarmer(farmerName, clientID);
-        sendMessage(buildJson(clientID, "joinRoom","result",true,"roomName",roomName,"userName",(String)eventObj.get("userName")));
+        sendMessage(buildJson(clientID.toString(), "joinRoom","result",true,"roomName",roomName,"userName",(String)eventObj.get("userName")));
+        list = new JSONArray();
+        //JSONObject farmers = new JSONObject();
+        msg = new JSONObject();
+        for(Farm f:games.get(roomName).getFarms()){
+          JSONObject farm = new JSONObject();
+          farm.put("name", f.getName());
+          farm.put("ready", true);
+//          list.add("\""+f.getName()+"\"");
+//          list.add(false);
+          list.add(farm);
+        }
+        msg.put("event", "farmerList");
+        msg.put("clientID", roomName);
+        msg.put("Farmers", list);
+        System.out.println(msg.toJSONString());
+        sendMessage(msg.toJSONString());
+        //sendMessage(buildJson(roomName,"farmerList"));
       }
       else
-        sendMessage(buildJson(clientID, "joinRoom","result",false));
+        sendMessage(buildJson(clientID.toString(), "joinRoom","result",false));
+
+
       break;
     default:
     }
@@ -180,7 +199,7 @@ public class HandlerHelper {
     }
     return false;
   }
-  private String buildJson(int clientID, String event, Object ... arguments){
+  private String buildJson(String clientID, String event, Object ... arguments){
     String start = "{\"event\":\""+event+"\",\"clientID\":\"" + clientID + "\",";
     StringBuilder sb = new StringBuilder(start);
     if(!(arguments.length % 2 == 0)){

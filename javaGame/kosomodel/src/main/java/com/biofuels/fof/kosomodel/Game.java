@@ -116,5 +116,10 @@ public class Game {
     return cropList;
   }
 
+public ArrayList<Farm> getFarms() {
+  // TODO Auto-generated method stub
+  return new ArrayList<>(farms.values());
+}
+
 
 }
