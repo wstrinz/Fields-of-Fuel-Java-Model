@@ -15,7 +15,7 @@ end
 get '/start' do
   unless @@started_s
     Thread.new do
-      puts load('javaGame/server_runner.rb')
+      puts load('load_akka.rb')
     end
     @@started_s = true
     "Started server. Don't go running this twice now..."
