@@ -1,4 +1,5 @@
 require 'sinatra'
+require 'json'
 
 configure do
   @@started_s = false
@@ -23,4 +24,18 @@ get '/start' do
     "Server already started!"
   end
 end
+
+# get '/start_js' do
+#   unless @@started_s
+#     Thread.new do
+#       puts load('load_akka.rb')
+#     end
+#     @@started_s = true
+#     content_type :json
+#     {:result => true}.to_json
+#   else
+#     content_type :json
+#     {:result => false}.to_json
+#   end
+# end
 
