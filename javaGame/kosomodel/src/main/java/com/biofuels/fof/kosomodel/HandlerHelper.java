@@ -12,7 +12,7 @@ import akka.actor.ActorRef;
 
 public class HandlerHelper {
 
-  public static Map<String, Game> games = new HashMap<>();
+  public Map<String, Game> games = new HashMap<>();
   private ActorRef listener;
   private ActorRef handler;
 
@@ -28,6 +28,7 @@ public class HandlerHelper {
 
   @SuppressWarnings({ "unchecked", "deprecation" }) //not sure why a one-way send is deprecated...
   public String[] handle(String event){
+//    System.out.println("Handling " + event);
     ArrayList<String> replies = new ArrayList<>();
 
     JSONObject eventObj = (JSONObject) JSONValue.parse(event);
@@ -91,30 +92,20 @@ public class HandlerHelper {
       break;
 
     case "createRoom":
-      //uncomment to test concurrency
-      /*System.out.print("sleeping\n");
-            try {
-              Thread.sleep(10000);
-            } catch (InterruptedException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
-            }
-            System.out.print("waking\n");*/;
+
             if(games.get(roomName) != null){
               sendMessage(buildJson(clientID.toString(), "createRoom", "result", false));
-              sendMessage(buildJson(clientID.toString(), "createRoom", "result", false));
-              //        replies.add("{\"event\":\"createRoom\",\"result\":false}");
+
             }
             else if(((String)eventObj.get("password")).length()>0){
-              //        String pass = (String)eventObj.get("password");
-              //        long players = (long)eventObj.get("playerCount");
-              //            System.out.println("pass " + pass + " players " + (long)eventObj.get("playerCount"));
               games.put(roomName, new Game(roomName, (String)eventObj.get("password"), (long)eventObj.get("playerCount")));
+              sendMessage(buildJson(clientID.toString(), "createRoom","result",true));
             }
             else{
               games.put(roomName, new Game(roomName, (long)eventObj.get("playerCount")));
+              sendMessage(buildJson(clientID.toString(), "createRoom","result",true));
             }
-            sendMessage(buildJson(clientID.toString(), "createRoom","result",true));
+
             //replies.add("{\"event\":\"createRoom\",\"result\":true}");
             break;
 
@@ -285,12 +276,4 @@ public class HandlerHelper {
     this.listener = actor;
   }
 
-  //for testing
-  /*    public static void main(String[] args) {
-
-      String teststr = new String("{\"event\":\"createRoom\",\"roomName\":\"room\"}");
-      EventHandler meself = new EventHandler();
-      meself.handle(teststr);
-
-    }*/
 }

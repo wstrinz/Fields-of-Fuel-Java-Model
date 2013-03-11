@@ -65,12 +65,16 @@ class ModelWrapper < Base
       if msg == "hello?"
         getSender().tell("hihi")
       end
-    elsif msg.is_a? TestMessages::ValidateRoomMessage
+    elsif msg.is_a? TestMessages::TestMessage
       @replyaddr = getSender()
-      @timeout = Timeout.new(Duration.create(15, TimeUnit::SECONDS));
-      msg.handler.tell(msg.message)
+      # @timeout = Timeout.new(Duration.create(15, TimeUnit::SECONDS));
+      msg.handler.tell(msg.event)
     elsif msg.is_a? EventMessage
       @replyaddr.tell(msg.message)
+    elsif msg.test_message
+      @replyaddr = getSender()
+      puts "testing #{msg.test_message.event.message}"
+      msg.test_message.handler.tell(msg.test_message.event)
     end
   end
 end
@@ -83,24 +87,72 @@ describe ModelWrapper do
     jside = ActorSystemHelper.new
     @handler = jside.makenew(@system, Handler, "handler")  # = system.actorOf(pro, "counter")
     @handler.tell(@listener)
-  end
-
-  it "should be friendly and say hello" do
-    future = Patterns.ask(@listener, "hello?", @timeout);
-    result = Await.result(future, @timeout.duration());
-    result.should == "hihi"
-    # should be "hello"
-  end
-
-  it "should be able to ask ifa room is open" do
-    future = Patterns.ask(@listener, TestMessages::ValidateRoomMessage.new("new room name", @handler), @timeout)
-    result = Await.result(future, @timeout.duration())
-    parsed = JSON.parse(result)
-    parsed["result"].should == true
+    @hash_template = {
+      "roomName" => "noNameRoom",
+      "clientID" => "0",
+      "password" => "",
+      "deviseName" => "fake@fake.com",
+      "userName" => "Joe Farmer"
+    }
   end
 
   after(:each) do
     @system.shutdown
     @system.await_termination
   end
+
+  it "should be able to create and talk to actor" do
+    future = Patterns.ask(@listener, "hello?", @timeout);
+    result = Await.result(future, @timeout.duration());
+    result.should == "hihi"
+    # should be "hello"
+  end
+
+  it "should be able to ask if a room is open" do
+    future = Patterns.ask(@listener, TestMessages::ValidateRoomMessage.new(@handler, @hash_template), @timeout)
+    result = Await.result(future, @timeout.duration())
+    parsed = JSON.parse(result)
+    parsed["result"].should == true
+  end
+
+  it "should be able to create room" do
+    future = Patterns.ask(@listener, TestMessages::CreateRoomMessage.new(@handler, @hash_template), @timeout)
+    result = Await.result(future, @timeout.duration())
+    parsed = JSON.parse(result)
+    parsed["result"].should == true
+  end
+
+  it "should be unable to create room twice invalid" do
+    future = Patterns.ask(@listener, TestMessages::CreateRoomMessage.new(@handler, @hash_template), @timeout)
+    result = Await.result(future, @timeout.duration())
+    parsed = JSON.parse(result)
+    parsed["result"].should == true
+
+    future = Patterns.ask(@listener, TestMessages::CreateRoomMessage.new(@handler, @hash_template), @timeout)
+    result = Await.result(future, @timeout.duration())
+    parsed = JSON.parse(result)
+    parsed["result"].should == false
+  end
+
+  it "should see existing rooms as invalid" do
+    future = Patterns.ask(@listener, TestMessages::CreateRoomMessage.new(@handler, @hash_template), @timeout)
+    result = Await.result(future, @timeout.duration())
+    parsed = JSON.parse(result)
+    parsed["result"].should == true
+
+    future = Patterns.ask(@listener, TestMessages::ValidateRoomMessage.new(@handler, @hash_template), @timeout)
+    result = Await.result(future, @timeout.duration())
+    parsed = JSON.parse(result)
+    parsed["result"].should == false
+  end
+
+  it "should be able to create a passworded room" do
+    @hash_template["password"]="apassword"
+
+    future = Patterns.ask(@listener, TestMessages::CreateRoomMessage.new(@handler, @hash_template), @timeout)
+    result = Await.result(future, @timeout.duration())
+    parsed = JSON.parse(result)
+    parsed["result"].should == true
+  end
+
 end
