@@ -168,6 +168,11 @@ public class HandlerHelper {
       sendMessage(msg.toJSONString());
     break;
 
+    case "plantField":
+      //System.out.println("planting");
+      games.get(roomID).getFarm(clientID).setField(((Long)eventObj.get("field")).intValue(),(String) eventObj.get("crop"));
+    break;
+
     case "joinRoom":
       boolean roomExist = roomExists(roomName);
       boolean shouldMakeNew = false;

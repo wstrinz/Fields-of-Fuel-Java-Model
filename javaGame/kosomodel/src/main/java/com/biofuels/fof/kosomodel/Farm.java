@@ -18,7 +18,7 @@ public class Farm {
     this.name = name;
     this.capital = capital;
     fields = new Field[2];
-//    fields[0].setCrop(Crop.GRASS);
+    //    fields[0].setCrop(Crop.GRASS);
     // TODO Auto-generated constructor stub
   }
 
@@ -94,6 +94,22 @@ public class Farm {
 
   public void setCurrentUser(String currentUser) {
     this.currentUser = currentUser;
+  }
+
+  public void setField(Integer fieldNum, String crop) {
+    // TODO Auto-generated method stub
+    System.out.println("planting " + crop + " on field " + fieldNum);
+    switch (crop){
+    case "grass":
+      fields[fieldNum].setCrop(Crop.GRASS);
+      break;
+    case "corn":
+      fields[fieldNum].setCrop(Crop.CORN);
+      break;
+    case "none":
+      fields[fieldNum].setCrop(Crop.FALLOW);
+      break;
+    }
   }
 
 

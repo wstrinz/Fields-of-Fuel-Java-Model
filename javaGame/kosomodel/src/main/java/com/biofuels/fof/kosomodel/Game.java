@@ -16,7 +16,7 @@ public class Game {
   private long maxPlayers;
   private RoundManager roundManager;
 
-/*  private class RoundManager{
+  /*  private class RoundManager{
 
 
     public RoundManager(boolean contracts, boolean management){
@@ -116,27 +116,32 @@ public class Game {
     return cropList;
   }
 
-public ArrayList<Farm> getFarms() {
-  // TODO Auto-generated method stub
-  return new ArrayList<>(farms.values());
-}
+  public ArrayList<Farm> getFarms() {
+    // TODO Auto-generated method stub
+    return new ArrayList<>(farms.values());
+  }
 
-public Farm getFarm(String name) {
-  // TODO Auto-generated method stub
-  for(Farm f:farms.values()){
-        if (f.getName().equals(name))
-          return f;
-      }
-  return null;
-}
+  public Farm getFarm(String name) {
+    // TODO Auto-generated method stub
+    for(Farm f:farms.values()){
+      if (f.getName().equals(name))
+        return f;
+    }
+    return null;
+  }
 
-public void rejoinFarmer(String farmerName, Integer clientID) {
-  // TODO Auto-generated method stub
-  Farm farm = getFarm(farmerName);
-  farms.remove(getFarm(farmerName).getClientID());
-  farm.setClientID(clientID);
-  farms.put(clientID, farm);
-}
+  public void rejoinFarmer(String farmerName, Integer clientID) {
+    // TODO Auto-generated method stub
+    Farm farm = getFarm(farmerName);
+    farms.remove(getFarm(farmerName).getClientID());
+    farm.setClientID(clientID);
+    farms.put(clientID, farm);
+  }
+
+  public Farm getFarm(Integer clientID) {
+    // TODO Auto-generated method stub
+    return farms.get(clientID);
+  }
 
 
 }
