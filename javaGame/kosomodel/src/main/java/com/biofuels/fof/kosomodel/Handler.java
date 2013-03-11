@@ -9,7 +9,7 @@ import org.json.simple.*;
 
 public class Handler extends UntypedActor{
 
-  HandlerHelper eh = new HandlerHelper(getContext().actorFor("/user/listener"));
+  HandlerHelper eh = new HandlerHelper(getContext().actorFor("/user/listener"), getSelf());
 
   public void onReceive(Object message) throws Exception {
 

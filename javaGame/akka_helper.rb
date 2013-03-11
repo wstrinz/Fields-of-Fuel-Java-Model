@@ -1,3 +1,4 @@
+require 'java'
 module AkkaHelper
   class Base < UntypedActor
     def self.create(*args)

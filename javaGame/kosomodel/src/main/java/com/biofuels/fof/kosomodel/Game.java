@@ -65,8 +65,8 @@ public class Game {
     // TODO Auto-generated method stub
     Farm f = new Farm(newPlayer, 1000);
     f.setClientID(clientID);
-    f.getFields()[0] = new Field();
-    f.getFields()[1] = new Field();
+    f.getFields().add(new Field());
+    f.getFields().add(new Field());
     farms.put(clientID, f);
 
   }
@@ -104,7 +104,7 @@ public class Game {
   }
 
   public void setField(int clientID, int field, Crop crop){
-    farms.get(clientID).getFields()[field].setCrop(crop);
+    farms.get(clientID).getFields().get(field).setCrop(crop);
   }
 
   public ArrayList<Crop> getFieldsFor(Integer clientID) {
@@ -141,6 +141,23 @@ public class Game {
   public Farm getFarm(Integer clientID) {
     // TODO Auto-generated method stub
     return farms.get(clientID);
+  }
+
+  public void changeSettings(int fields, boolean contracts, boolean management) {
+    // TODO Auto-generated method stub
+    int currFields = ((Farm)farms.values().toArray()[0]).getFields().size();
+    if(fields < currFields){
+      System.out.println("destroying fields not implemented yet");
+    }
+    else if(fields > currFields){
+      for(Farm f:farms.values()){
+        for(int i = 0;i<fields - currFields;i++){
+          f.getFields().add(new Field());
+        }
+      }
+    }
+    this.contracts = contracts;
+    this.management = management;
   }
 
 

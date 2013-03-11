@@ -1,10 +1,13 @@
 package com.biofuels.fof.kosomodel;
 
+import java.util.LinkedList;
+
 public class Farm {
 
   private String name;
   private int clientID;
-  private Field[] fields;
+//  private Field[] fields;
+  private LinkedList<Field> fields;
   private int capital;
   private int envScore;
   private int socScore;
@@ -17,12 +20,12 @@ public class Farm {
   public Farm(String name, int capital) {
     this.name = name;
     this.capital = capital;
-    fields = new Field[2];
+    fields = new LinkedList<Field>();
     //    fields[0].setCrop(Crop.GRASS);
     // TODO Auto-generated constructor stub
   }
 
-  public Field[] getFields(){
+  public LinkedList<Field> getFields(){
     return fields;
   }
 
@@ -101,13 +104,13 @@ public class Farm {
     System.out.println("planting " + crop + " on field " + fieldNum);
     switch (crop){
     case "grass":
-      fields[fieldNum].setCrop(Crop.GRASS);
+      fields.get(fieldNum).setCrop(Crop.GRASS);
       break;
     case "corn":
-      fields[fieldNum].setCrop(Crop.CORN);
+      fields.get(fieldNum).setCrop(Crop.CORN);
       break;
     case "none":
-      fields[fieldNum].setCrop(Crop.FALLOW);
+      fields.get(fieldNum).setCrop(Crop.FALLOW);
       break;
     }
   }

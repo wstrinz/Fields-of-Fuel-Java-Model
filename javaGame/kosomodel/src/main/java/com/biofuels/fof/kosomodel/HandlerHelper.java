@@ -14,14 +14,16 @@ public class HandlerHelper {
 
   public static Map<String, Game> games = new HashMap<>();
   private ActorRef listener;
+  private ActorRef handler;
 
   public HandlerHelper() {
     // TODO Auto-generated constructor stub
   }
 
-  public HandlerHelper(ActorRef listener) {
+  public HandlerHelper(ActorRef listener, ActorRef handler) {
     // TODO Auto-generated constructor stub
     this.listener = listener;
+    this.handler = handler;
   }
 
   @SuppressWarnings({ "unchecked", "deprecation" }) //not sure why a one-way send is deprecated...
@@ -84,6 +86,8 @@ public class HandlerHelper {
 
     case "changeSettings":
       //replies.add(event);
+      games.get(roomID).changeSettings(((Long)eventObj.get("fieldCount")).intValue(),
+          (boolean) eventObj.get("contractsOn"), (boolean)eventObj.get("mgmtOptsOn"));
       break;
 
     case "createRoom":
@@ -231,7 +235,7 @@ public class HandlerHelper {
     // TODO Auto-generated method stub
     EventMessage msg = new EventMessage(message);
     System.out.println("sending " + msg.message);
-    listener.tell(msg);
+    listener.tell(msg, handler);
   }
 
   private boolean roomExists(String room){
