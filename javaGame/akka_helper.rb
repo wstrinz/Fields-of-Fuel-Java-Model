@@ -41,7 +41,9 @@ module AkkaHelper
         @red = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
       elsif msg.is_a? EventMessage
         if @red
-          @red.lpush("fromJava",msg.message)
+          # puts "writing #{msg.message} to pipe"
+          # @red.lpush("fromJava",msg.message)
+            @red.publish(:toRuby,msg.message)
         else
           puts "Redis sever not specified"
         end

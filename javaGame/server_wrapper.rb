@@ -87,6 +87,10 @@ class ServerWrapper
     @red.lpush("fromJava",msg)
   end
 
+  def publish(msg)
+    @red.publish('rubyonrails',msg)
+  end
+
   def read_queue
     ret = nil
     until ret
@@ -120,5 +124,4 @@ class ServerWrapper
     @handler.tell(@listener)
     watch('redis')
   end
-
 end

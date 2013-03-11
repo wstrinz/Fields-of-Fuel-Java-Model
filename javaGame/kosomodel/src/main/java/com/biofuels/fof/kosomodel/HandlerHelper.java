@@ -36,7 +36,9 @@ public class HandlerHelper {
       clientID = Integer.parseInt((String) eventObj.get("clientID"));
     }
     String roomName = (String) eventObj.get("roomName");
+    String roomID = (String) eventObj.get("roomID");
     String farmerName = (String) eventObj.get("userName");
+    String deviseName = (String) eventObj.get("deviseName");
 
     switch (eventObj.get("event").toString()){
 
@@ -117,8 +119,11 @@ public class HandlerHelper {
       boolean nameResult = false;
        needsPass = false;
        correctPass = false;
-      if(roomResult){
-        nameResult = !eventObj.get("userName").equals("") && !farmerExistsInRoom(farmerName, roomName);//!games.get(roomName).hasFarmer((String) eventObj.get(eventObj.get("userName")));
+       if(roomResult){
+        System.out.println("user " + eventObj.get("userName"));
+        nameResult = !eventObj.get("userName").equals("");
+        nameResult = nameResult && ((!farmerExistsInRoom(farmerName, roomName)
+                || (deviseName != null && games.get(roomName).getFarm(farmerName).getCurrentUser().equals(deviseName))));
         needsPass = games.get(roomName).hasPassword();
         if(needsPass){
           correctPass = games.get(roomName).getPassword().equals(eventObj.get("password"));
@@ -144,11 +149,46 @@ public class HandlerHelper {
 
       break;
 
+    case "getFarmerList":
+      list = new JSONArray();
+      //JSONObject farmers = new JSONObject();
+      msg = new JSONObject();
+      for(Farm f:games.get(roomID).getFarms()){
+        JSONObject farm = new JSONObject();
+        farm.put("name", f.getName());
+        farm.put("ready", true);
+//        list.add("\""+f.getName()+"\"");
+//        list.add(false);
+        list.add(farm);
+      }
+      msg.put("event", "farmerList");
+      msg.put("clientID", clientID);
+      msg.put("Farmers", list);
+      System.out.println(msg.toJSONString());
+      sendMessage(msg.toJSONString());
+    break;
+
     case "joinRoom":
-      if(roomExists(roomName) && (!farmerExistsInRoom(farmerName, roomName) && !games.get(roomName).isFull())
-          && games.get(roomName).getPassword().equals(eventObj.get("password")))
+      boolean roomExist = roomExists(roomName);
+      boolean shouldMakeNew = false;
+      boolean shouldRejoin = false;
+      if(roomExist){
+        shouldMakeNew = !farmerExistsInRoom(farmerName, roomName) && !games.get(roomName).isFull();
+        if(!shouldMakeNew){
+
+          shouldRejoin = deviseName != null && games.get(roomName).getFarm(farmerName).getCurrentUser().equals(deviseName);
+          System.out.println("can rejoin? " + shouldRejoin);
+        }
+      }
+      if(roomExist && (shouldMakeNew || shouldRejoin) && games.get(roomName).getPassword().equals(eventObj.get("password")))
       {
-        games.get(roomName).addFarmer(farmerName, clientID);
+        if(shouldMakeNew){
+          games.get(roomName).addFarmer(farmerName, clientID);
+          games.get(roomName).getFarm(farmerName).setCurrentUser(deviseName);
+        }
+        else if(shouldRejoin){
+          games.get(roomName).rejoinFarmer(farmerName, clientID);
+        }
         sendMessage(buildJson(clientID.toString(), "joinRoom","result",true,"roomName",roomName,"userName",(String)eventObj.get("userName")));
         list = new JSONArray();
         //JSONObject farmers = new JSONObject();
@@ -164,14 +204,12 @@ public class HandlerHelper {
         msg.put("event", "farmerList");
         msg.put("clientID", roomName);
         msg.put("Farmers", list);
-        System.out.println(msg.toJSONString());
+//        System.out.println(msg.toJSONString());
         sendMessage(msg.toJSONString());
         //sendMessage(buildJson(roomName,"farmerList"));
       }
       else
         sendMessage(buildJson(clientID.toString(), "joinRoom","result",false));
-
-
       break;
     default:
     }
@@ -186,7 +224,9 @@ public class HandlerHelper {
 
   private void sendMessage(String message) {
     // TODO Auto-generated method stub
-    listener.tell(new EventMessage(message));
+    EventMessage msg = new EventMessage(message);
+    System.out.println("sending " + msg.message);
+    listener.tell(msg);
   }
 
   private boolean roomExists(String room){

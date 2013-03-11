@@ -9,6 +9,7 @@ public class Farm {
   private int envScore;
   private int socScore;
   private int econScore;
+  private String currentUser;
   private boolean acceptCornContract;
   private boolean acceptSwitchgrassContract;
 
@@ -85,6 +86,14 @@ public class Farm {
 
   public void setAcceptSwitchgrassContract(boolean acceptSwitchgrassContract) {
     this.acceptSwitchgrassContract = acceptSwitchgrassContract;
+  }
+
+  public String getCurrentUser() {
+    return currentUser;
+  }
+
+  public void setCurrentUser(String currentUser) {
+    this.currentUser = currentUser;
   }
 
 
