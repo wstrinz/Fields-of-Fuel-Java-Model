@@ -10,7 +10,7 @@ public class Field {
   private ManagementOptions management;
 
   public Field() {
-    setCrop(randomCrop());
+    setCrop(Crop.CORN);
     management = new ManagementOptions();
     // TODO Auto-generated constructor stub
   }

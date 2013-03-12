@@ -1,5 +1,6 @@
 package com.biofuels.fof.kosomodel;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -15,6 +16,7 @@ public class Game {
   private ConcurrentHashMap<Integer, Farm> farms;  //used because doesn't allow annoying null mappings
   private long maxPlayers;
   private RoundManager roundManager;
+  private int gameYear=0;
 
   /*  private class RoundManager{
 
@@ -34,6 +36,7 @@ public class Game {
     roundManager = new RoundManager();
     roundManager.Init(this);
     this.maxPlayers = maxPlayers;
+    roundManager.AdvanceStage();
     // TODO Auto-generated constructor stub
   }
 
@@ -45,6 +48,7 @@ public class Game {
     this.maxPlayers = maxPlayers;
     roundManager = new RoundManager();
     roundManager.Init(this);
+    roundManager.AdvanceStage();
     // TODO Auto-generated constructor stub
   }
 
@@ -107,11 +111,11 @@ public class Game {
     farms.get(clientID).getFields().get(field).setCrop(crop);
   }
 
-  public ArrayList<Crop> getFieldsFor(Integer clientID) {
+  public ArrayList<String> getFieldsFor(Integer clientID) {
     // TODO Auto-generated method stub
-    ArrayList<Crop> cropList = new ArrayList<>();
+    ArrayList<String> cropList = new ArrayList<>();
     for(Field f:farms.get(clientID).getFields()){
-      cropList.add(f.getCrop());
+      cropList.add(f.getCrop().toString());
     }
     return cropList;
   }
@@ -158,6 +162,33 @@ public class Game {
     }
     this.contracts = contracts;
     this.management = management;
+  }
+
+  public List<Field> getFields(Integer clientID) {
+    // TODO Auto-generated method stub
+    return farms.get(clientID).getFields();
+  }
+
+  public int getYear() {
+    // TODO Auto-generated method stub
+    return gameYear;
+  }
+
+  public int getStageNumber() {
+    // TODO Auto-generated method stub
+    return roundManager.getCurrentStageNumber();
+  }
+
+  public List<String> getEnabledStages() {
+    // TODO Auto-generated method stub
+    ArrayList<String> rounds = new ArrayList<String>();
+    rounds.add("plant");
+    return rounds;
+  }
+
+  public void advanceStage() {
+    // TODO Auto-generated method stub
+    roundManager.AdvanceStage();
   }
 
 

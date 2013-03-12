@@ -101,7 +101,7 @@ public class Farm {
 
   public void setField(Integer fieldNum, String crop) {
     // TODO Auto-generated method stub
-    System.out.println("planting " + crop + " on field " + fieldNum);
+//    System.out.println("planting " + crop + " on field " + fieldNum);
     switch (crop){
     case "grass":
       fields.get(fieldNum).setCrop(Crop.GRASS);
@@ -113,6 +113,24 @@ public class Farm {
       fields.get(fieldNum).setCrop(Crop.FALLOW);
       break;
     }
+  }
+
+  public void changeFieldManagement(int fieldnum, String technique, boolean value) {
+    // TODO Possibly add checks for if managment is on?
+    Field field = fields.get(fieldnum);
+    switch (technique){
+    case "fertilizer":
+      field.setFertilize(value);
+      break;
+    case "pesticide":
+      field.setPesticide(value);
+      break;
+    case "tillage":
+      field.setTill(value);
+      break;
+
+    }
+
   }
 
 

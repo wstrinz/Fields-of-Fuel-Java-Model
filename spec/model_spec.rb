@@ -1,5 +1,6 @@
 require 'rspec'
 require 'json'
+require 'rspec/autorun'
 
   scriptloc = File.expand_path(File.dirname(__FILE__))
   $CLASSPATH << "#{scriptloc}/../*"
@@ -41,9 +42,9 @@ require 'json'
   # java_import 'AkkaProjectInJava'
   # java_import 'AkkaProjectInJava.Counter'
 
-# include JavaLoaderRspec
+include TestMessages
 
-class Base < UntypedActor
+class BaseActor < UntypedActor
     def self.create(*args)
       self.new(*args)
     end
@@ -58,42 +59,117 @@ class Base < UntypedActor
     end
   end
 
-class ModelWrapper < Base
+class ModelWrapper < BaseActor
   def onReceive(msg)
     if msg.is_a? String
       # puts "got a string: #{msg}"
       if msg == "hello?"
         getSender().tell("hihi")
       end
-    elsif msg.is_a? TestMessages::TestMessage
+    elsif msg.is_a? TestMessage
       @replyaddr = getSender()
+      @replies = []
+      @expected_replies = msg.test_message.expected_replies
       # @timeout = Timeout.new(Duration.create(15, TimeUnit::SECONDS));
       msg.handler.tell(msg.event)
     elsif msg.is_a? EventMessage
-      @replyaddr.tell(msg.message)
+
+      if @replies.count < @expected_replies
+        @replies << msg.message
+      elsif @replies.count > @expected_replies
+        puts "unexpected number of replies"
+        raise "unexpected number of replies" unless @expected_replies == -1
+      end
+
+      if @replies.count == @expected_replies
+        if @expected_replies == 1
+          ## making this/these here/when they come in a proper message might help concurrency issues?
+          returnMsg = @replies[0]
+        else
+          returnMsg = @replies
+        end
+        if !returnMsg
+          puts "return message nil :("
+        end
+        @replyaddr.tell(returnMsg)
+      end
+
     elsif msg.test_message
       @replyaddr = getSender()
-      puts "testing #{msg.test_message.event.message}"
+      @replies = []
+      @expected_replies = msg.test_message.expected_replies
+      # puts "testing #{msg.test_message.event.message}"
+      # puts "expecting #{@expected_replies} replies"
       msg.test_message.handler.tell(msg.test_message.event)
     end
   end
 end
 
+
+
+
+
+########################################################################################################################
+########################################################################################################################
+#
+#
+#
+#                                       TESTS
+#
+#
+#
+#
+########################################################################################################################
+########################################################################################################################
+
+
+
+
 describe ModelWrapper do
-  before(:each) do
-    @system = ActorSystem.create("BiofuelsTest")
-    @listener = @system.actorOf(Props.new(ModelWrapper), "listener")
-    @timeout = Timeout.new(Duration.create(30, TimeUnit::SECONDS));
-    jside = ActorSystemHelper.new
-    @handler = jside.makenew(@system, Handler, "handler")  # = system.actorOf(pro, "counter")
-    @handler.tell(@listener)
-    @hash_template = {
+
+  def askActor(message_type, expect_count=1, options=@template)
+    future = Patterns.ask(@listener, message_type.new(@handler, options, expect_count), @timeout)
+    if expect_count != 0
+      result = Await.result(future, @timeout.duration())
+      if result.is_a? Array
+        result.map! { |r| JSON.parse(r) }
+      else
+        result = JSON.parse(result)
+      end
+    else
+      result = "No result asked for!"
+    end
+    result
+  end
+
+  def reset_template!
+    @template = {
       "roomName" => "noNameRoom",
       "clientID" => "0",
       "password" => "",
       "deviseName" => "fake@fake.com",
-      "userName" => "Joe Farmer"
+      "userName" => "Joe Farmer",
+      "roomID" => "noNameRoom"
     }
+  end
+
+  before(:each) do
+    @system = ActorSystem.create("BiofuelsTest")
+    @listener = @system.actorOf(Props.new(ModelWrapper), "listener")
+    @timeout = Timeout.new(Duration.create(3, TimeUnit::SECONDS));
+    jside = ActorSystemHelper.new
+    @handler = jside.makenew(@system, Handler, "handler")  # = system.actorOf(pro, "counter")
+    @handler.tell(@listener)
+    @template = {
+      "roomName" => "noNameRoom",
+      "clientID" => "0",
+      "password" => "",
+      "deviseName" => "fake@fake.com",
+      "userName" => "Joe Farmer",
+      "roomID" => "noNameRoom"
+    }
+    askActor(CreateRoomMessage)["result"].should == true
+
   end
 
   after(:each) do
@@ -101,58 +177,190 @@ describe ModelWrapper do
     @system.await_termination
   end
 
-  it "should be able to create and talk to actor" do
+  it "creates and talk to actor" do
     future = Patterns.ask(@listener, "hello?", @timeout);
     result = Await.result(future, @timeout.duration());
     result.should == "hihi"
     # should be "hello"
   end
 
-  it "should be able to ask if a room is open" do
-    future = Patterns.ask(@listener, TestMessages::ValidateRoomMessage.new(@handler, @hash_template), @timeout)
-    result = Await.result(future, @timeout.duration())
-    parsed = JSON.parse(result)
-    parsed["result"].should == true
+  it "asks if a room is open" do
+    @template["roomName"] = "new Room"
+    askActor(ValidateRoomMessage)["result"].should == true
   end
 
-  it "should be able to create room" do
-    future = Patterns.ask(@listener, TestMessages::CreateRoomMessage.new(@handler, @hash_template), @timeout)
-    result = Await.result(future, @timeout.duration())
-    parsed = JSON.parse(result)
-    parsed["result"].should == true
+  it "creates room" do
+    @template["roomName"] = "new Room"
+    askActor(CreateRoomMessage)["result"].should == true
   end
 
-  it "should be unable to create room twice invalid" do
-    future = Patterns.ask(@listener, TestMessages::CreateRoomMessage.new(@handler, @hash_template), @timeout)
-    result = Await.result(future, @timeout.duration())
-    parsed = JSON.parse(result)
-    parsed["result"].should == true
-
-    future = Patterns.ask(@listener, TestMessages::CreateRoomMessage.new(@handler, @hash_template), @timeout)
-    result = Await.result(future, @timeout.duration())
-    parsed = JSON.parse(result)
-    parsed["result"].should == false
+  it "can't create room twice" do
+    askActor(CreateRoomMessage)["result"].should == false
   end
 
-  it "should see existing rooms as invalid" do
-    future = Patterns.ask(@listener, TestMessages::CreateRoomMessage.new(@handler, @hash_template), @timeout)
-    result = Await.result(future, @timeout.duration())
-    parsed = JSON.parse(result)
-    parsed["result"].should == true
-
-    future = Patterns.ask(@listener, TestMessages::ValidateRoomMessage.new(@handler, @hash_template), @timeout)
-    result = Await.result(future, @timeout.duration())
-    parsed = JSON.parse(result)
-    parsed["result"].should == false
+  it "sees existing rooms as invalid for creation" do
+    askActor(ValidateRoomMessage)["result"].should == false
   end
 
-  it "should be able to create a passworded room" do
-    @hash_template["password"]="apassword"
-
-    future = Patterns.ask(@listener, TestMessages::CreateRoomMessage.new(@handler, @hash_template), @timeout)
-    result = Await.result(future, @timeout.duration())
-    parsed = JSON.parse(result)
-    parsed["result"].should == true
+  it "creates a passworded room" do
+    @template["password"]="apassword"
+    @template["roomName"] = "new Room"
+    askActor(CreateRoomMessage)["result"].should == true
   end
 
+  it "is invalid for user on empty room" do
+    @template["roomName"] = "new Room"
+    askActor(JoinGameMessage)["result"].should == false
+  end
+
+  it "is valid for user on extant room" do
+    result = askActor(ValidateUserMessage)
+    result["roomResult"].should == true
+    result["userNameResult"].should == true
+  end
+
+  it "joins created games" do
+    askActor(JoinGameMessage)["result"].should == true
+  end
+
+  it "rejoins game in progress if has same devise name" do
+    askActor(JoinGameMessage)["result"].should == true
+    askActor(JoinGameMessage)["result"].should == true
+  end
+
+  it "can't rejoin game in progress if has different devise name" do
+    askActor(JoinGameMessage)["result"].should == true
+    reset_template!
+    @template["deviseName"] = "someone@else.com"
+    res = askActor(JoinGameMessage)
+    unless res["result"]
+      puts "\n no result field for rejoin test, probably concurrency problem"
+      "#{res}"
+    end
+    res["result"].should == false
+  end
+
+  it "joins password games if password is known" do
+    @template["password"]="apassword"
+    @template["roomName"] = "new Room"
+    askActor(CreateRoomMessage)["result"].should == true
+    askActor(JoinGameMessage)["result"].should == true
+  end
+
+  it "can't join password protected games without the right password" do
+    @template["password"] = "apassword"
+    @template["roomName"] = "new Room"
+    askActor(CreateRoomMessage)["result"].should == true
+
+    @template["password"]="wrongpass"
+    askActor(JoinGameMessage)["result"].should == false
+  end
+
+  it "sends out both confirmation and room info on a successful join" do
+
+    joinReply = askActor(JoinGameMessage, 2)
+    joinReply[0]["result"].should == true
+    joinReply[1]["event"].should == "farmerList"
+    joinReply[1]["Farmers"][0]["name"].should == @template["userName"]
+  end
+
+  it "is assigned 2 fields with corn on loading" do
+    askActor(JoinGameMessage, 2)
+
+    # fields = askActor(LoadFieldsMessage)["fields"]
+
+    askActor(LoadFieldsMessage)["fields"][0]["crop"].should == "CORN"
+  end
+
+  it "can plant switchgrass on first field" do
+    askActor(JoinGameMessage, 2)
+    @template["crop"] = "grass"
+    askActor(PlantMessage, 0)
+    fields = askActor(LoadFieldsMessage)["fields"]
+    fields[0]["crop"].should == "GRASS"
+  end
+
+  it "can use fertilizer on fields" do
+    ## eventually should have check for management being on
+    askActor(JoinGameMessage)
+    @template["field"] = 0
+    @template["technique"] = "fertilizer"
+    @template["value"] = true
+    @template["event"] = "setFieldManagement"
+    askActor(GenericMessage, 0)
+
+    reset_template!
+
+    fields = askActor(LoadFieldsMessage)["fields"]
+    # unless fields[0]
+    #   puts "missing fields #{fields}"
+    # end
+    fields[0]["fertilizer"].should == true
+  end
+
+  it "can use pesticide on fields" do
+    askActor(JoinGameMessage)
+    @template["field"] = 0
+    @template["technique"] = "pesticide"
+    @template["value"] = true
+    @template["event"] = "setFieldManagement"
+    askActor(GenericMessage, 0)
+
+    reset_template!
+
+    fields = askActor(LoadFieldsMessage)["fields"]
+    # unless fields[0]
+    #   puts "missing fields #{fields}"
+    # end
+    fields[0]["pesticide"].should == true
+  end
+
+  it "can use tillage on fields" do
+    askActor(JoinGameMessage)
+    @template["field"] = 0
+    @template["technique"] = "tillage"
+    @template["value"] = true
+    @template["event"] = "setFieldManagement"
+    askActor(GenericMessage, 0)
+
+    reset_template!
+
+    fields = askActor(LoadFieldsMessage)["fields"]
+    # unless fields[0]
+    #   puts "missing fields #{fields}"
+    # end
+    fields[0]["tillage"].should == true
+  end
+
+  it "can get game year, current stage, and enabled stages" do
+    @template["event"] = "getGameInfo"
+    reply = askActor(GenericMessage, 1)
+    reply["year"].should >= 0
+    reply["stage"].should >= 0
+    reply["enabledStages"].should_not be nil
+  end
+
+  it "can advance stages" do
+    @template["event"] = "getGameInfo"
+    reply = askActor(GenericMessage, 1)
+    reply["stage"].should == 0
+
+    reset_template!
+
+    # puts "got game info 1"
+
+    @template["event"] = "advanceStage"
+    reply = askActor(GenericMessage, 1)
+    reply["event"].should == "advanceStage"
+    reply["stageNumber"].should > 0
+    reply["stageName"].is_a? String
+
+    # puts "advanced stage"
+    reset_template!
+
+
+    @template["event"] = "getGameInfo"
+    reply = askActor(GenericMessage, 1)
+    reply["stage"].should > 0
+  end
 end

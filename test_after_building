@@ -1,0 +1,5 @@
+cd javaGame/kosomodel
+mvn -e package
+cd ../..
+cd spec
+jruby --ng model_spec.rb 

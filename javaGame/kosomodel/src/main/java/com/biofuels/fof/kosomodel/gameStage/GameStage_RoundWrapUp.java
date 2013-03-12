@@ -4,10 +4,10 @@ import org.json.simple.*;
 
 
 //------------------------------------------------------------------------------
-public class GameStage_RoundWrapUp implements GameStage {
+public class GameStage_RoundWrapUp extends GameStage {
 
-	public boolean ShouldEnter() {return true; }
-	public void Enter() {}
-	public void Exit() {}
-	public void HandleClientData(JSONObject data) {}
+  public boolean ShouldEnter() {return true; }
+  public void Enter() {}
+  public void Exit() {}
+  public void HandleClientData(JSONObject data) {}
 }

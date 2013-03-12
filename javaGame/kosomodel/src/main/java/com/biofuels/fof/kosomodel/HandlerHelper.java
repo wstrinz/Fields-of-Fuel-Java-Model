@@ -2,6 +2,7 @@ package com.biofuels.fof.kosomodel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.simple.JSONArray;
@@ -26,7 +27,7 @@ public class HandlerHelper {
     this.handler = handler;
   }
 
-  @SuppressWarnings({ "unchecked", "deprecation" }) //not sure why a one-way send is deprecated...
+  @SuppressWarnings("unchecked")
   public String[] handle(String event){
 //    System.out.println("Handling " + event);
     ArrayList<String> replies = new ArrayList<>();
@@ -115,7 +116,7 @@ public class HandlerHelper {
        needsPass = false;
        correctPass = false;
        if(roomResult){
-        System.out.println("user " + eventObj.get("userName"));
+//        System.out.println("user " + eventObj.get("userName"));
         nameResult = !eventObj.get("userName").equals("");
         nameResult = nameResult && ((!farmerExistsInRoom(farmerName, roomName)
                 || (deviseName != null && games.get(roomName).getFarm(farmerName).getCurrentUser().equals(deviseName))));
@@ -133,13 +134,19 @@ public class HandlerHelper {
 
       JSONArray list = new JSONArray();
       JSONObject msg = new JSONObject();
-      JSONObject fields = new JSONObject();
+      //JSONObject fields = new JSONObject();
       msg.put("event", "loadFromServer");
       msg.put("clientID", clientID);
-      list.addAll(games.get(roomName).getFieldsFor(clientID));
-      fields.put("fields", JSONValue.toJSONString(list));
-      msg.putAll(fields);
-      System.out.println(msg.toJSONString());
+      for(Field f:games.get(roomName).getFields(clientID)){
+        JSONObject thisfield = new JSONObject();
+        thisfield.put("crop",f.getCrop().toString());
+        thisfield.put("fertilizer", f.isFertilize());
+        thisfield.put("pesticide", f.isPesticide());
+        thisfield.put("tillage",f.isTill());
+        list.add(thisfield);
+      }
+
+      msg.put("fields", list);
       sendMessage(msg.toJSONString());
 
       break;
@@ -159,13 +166,45 @@ public class HandlerHelper {
       msg.put("event", "farmerList");
       msg.put("clientID", clientID);
       msg.put("Farmers", list);
-      System.out.println(msg.toJSONString());
+//      System.out.println(msg.toJSONString());
       sendMessage(msg.toJSONString());
     break;
 
     case "plantField":
       //System.out.println("planting");
       games.get(roomID).getFarm(clientID).setField(((Long)eventObj.get("field")).intValue(),(String) eventObj.get("crop"));
+    break;
+
+    case "setFieldManagement":
+      int field = ((Long)eventObj.get("field")).intValue();
+      String technique = (String) eventObj.get("technique");
+      boolean value = (boolean) eventObj.get("value");
+      games.get(roomID).getFarm(clientID).changeFieldManagement(field, technique, value);
+    break;
+
+    case "getGameInfo":
+      int year = games.get(roomID).getYear();
+      int stage = games.get(roomID).getStageNumber();
+      List<String> enabledStages = games.get(roomID).getEnabledStages();
+//      System.out.println(enabledStages.toString());
+      JSONObject replyGameInfo = new JSONObject();
+      replyGameInfo.put("event", "getGameInfo");
+      replyGameInfo.put("year", year);
+      replyGameInfo.put("stage", stage);
+      replyGameInfo.put("enabledStages", new JSONArray().addAll(enabledStages));
+      sendMessage(replyGameInfo.toJSONString());
+    break;
+
+    case "advanceStage":
+      games.get(roomID).advanceStage();
+
+      stage = games.get(roomID).getStageNumber();
+      String roundName = "not implemented";
+      JSONObject replyAdvanceStage = new JSONObject();
+      replyAdvanceStage.put("event", "advanceStage");
+      replyAdvanceStage.put("stageNumber", stage);
+      replyAdvanceStage.put("stageName", roundName);
+      sendMessage(replyAdvanceStage.toJSONString());
     break;
 
     case "joinRoom":
@@ -175,9 +214,7 @@ public class HandlerHelper {
       if(roomExist){
         shouldMakeNew = !farmerExistsInRoom(farmerName, roomName) && !games.get(roomName).isFull();
         if(!shouldMakeNew){
-
           shouldRejoin = deviseName != null && games.get(roomName).getFarm(farmerName).getCurrentUser().equals(deviseName);
-          System.out.println("can rejoin? " + shouldRejoin);
         }
       }
       if(roomExist && (shouldMakeNew || shouldRejoin) && games.get(roomName).getPassword().equals(eventObj.get("password")))
@@ -191,22 +228,17 @@ public class HandlerHelper {
         }
         sendMessage(buildJson(clientID.toString(), "joinRoom","result",true,"roomName",roomName,"userName",(String)eventObj.get("userName")));
         list = new JSONArray();
-        //JSONObject farmers = new JSONObject();
         msg = new JSONObject();
         for(Farm f:games.get(roomName).getFarms()){
           JSONObject farm = new JSONObject();
           farm.put("name", f.getName());
           farm.put("ready", true);
-//          list.add("\""+f.getName()+"\"");
-//          list.add(false);
           list.add(farm);
         }
         msg.put("event", "farmerList");
         msg.put("clientID", roomName);
         msg.put("Farmers", list);
-//        System.out.println(msg.toJSONString());
         sendMessage(msg.toJSONString());
-        //sendMessage(buildJson(roomName,"farmerList"));
       }
       else
         sendMessage(buildJson(clientID.toString(), "joinRoom","result",false));
@@ -225,7 +257,7 @@ public class HandlerHelper {
   private void sendMessage(String message) {
     // TODO Auto-generated method stub
     EventMessage msg = new EventMessage(message);
-    System.out.println("sending " + msg.message);
+//    System.out.println("sending " + msg.message);
     listener.tell(msg, handler);
   }
 
@@ -239,6 +271,7 @@ public class HandlerHelper {
     }
     return false;
   }
+
   private String buildJson(String clientID, String event, Object ... arguments){
     String start = "{\"event\":\""+event+"\",\"clientID\":\"" + clientID + "\",";
     StringBuilder sb = new StringBuilder(start);

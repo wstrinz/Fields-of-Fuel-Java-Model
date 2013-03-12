@@ -40,6 +40,7 @@ public class RoundManager {
     GameStage nextStage;
     if (mGameStageIterator.hasNext()) {
       nextStage = mGameStageIterator.next();
+//      System.out.print("later: " + mGameStageIterator.next());
     }
     else {
       // wrap around to the start
@@ -57,6 +58,23 @@ public class RoundManager {
       // FIXME: prevent chance of endless recursion....
       this.AdvanceStage();
     }
+  }
+
+  public int getCurrentStageNumber(){
+    return getEnabledStages().indexOf(mCurrentGameStage);
+  }
+
+  public int getTotalStages(){
+    return getEnabledStages().size();
+  }
+
+  private List<GameStage> getEnabledStages(){
+    ArrayList<GameStage> stages = new ArrayList<>();
+    for(GameStage s:mGameStageSequence){
+      if(s.ShouldEnter())
+        stages.add(s);
+    }
+    return stages;
   }
 
   //--------------------------------------------------------------------------
