@@ -22,12 +22,12 @@ public class RoundManager {
     mGameStageSequence = new ArrayList<GameStage>();
 
     // Ordered by how we want them to play out, naturally.
-    mGameStageSequence.add(new GameStage_Contracts());
-    mGameStageSequence.add(new GameStage_Plant());
-    mGameStageSequence.add(new GameStage_Manage());
-    mGameStageSequence.add(new GameStage_Grow());
-    mGameStageSequence.add(new GameStage_RoundWrapUp());
-    mGameStageSequence.add(new GameStage_FinalWrapUp());
+    mGameStageSequence.add(new GameStage_Contracts(game));
+    mGameStageSequence.add(new GameStage_Plant(game));
+    mGameStageSequence.add(new GameStage_Manage(game));
+    mGameStageSequence.add(new GameStage_Grow(game));
+    mGameStageSequence.add(new GameStage_RoundWrapUp(game));
+    mGameStageSequence.add(new GameStage_FinalWrapUp(game));
 
     mGameStageIterator = mGameStageSequence.iterator();
     mCurrentGameStage = mGameStageSequence.get(0);
@@ -45,7 +45,9 @@ public class RoundManager {
     else {
       // wrap around to the start
       mGameStageIterator = mGameStageSequence.iterator();
-      nextStage = mGameStageSequence.get(0);
+      //nextStage = mGameStageSequence.get(0);
+      nextStage = mGameStageIterator.next();
+
     }
 
     if (nextStage.ShouldEnter()) {
@@ -84,5 +86,16 @@ public class RoundManager {
     //  see if there is anything it should handle? E.g., AdvancingStages, etc?
 
     mCurrentGameStage.HandleClientData(data);
+  }
+
+  public String getCurrentStageName() {
+    // TODO Auto-generated method stub
+    return mCurrentGameStage.getName();
+  }
+
+  public void resetStages() {
+    // TODO Auto-generated method stub
+    mGameStageIterator = mGameStageSequence.iterator();
+    AdvanceStage();
   }
 }

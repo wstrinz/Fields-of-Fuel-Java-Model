@@ -199,11 +199,12 @@ public class HandlerHelper {
       games.get(roomID).advanceStage();
 
       stage = games.get(roomID).getStageNumber();
-      String roundName = "not implemented";
+      String roundName = games.get(roomID).getStageName();
       JSONObject replyAdvanceStage = new JSONObject();
       replyAdvanceStage.put("event", "advanceStage");
       replyAdvanceStage.put("stageNumber", stage);
       replyAdvanceStage.put("stageName", roundName);
+      replyAdvanceStage.put("clientID", roomID);
       sendMessage(replyAdvanceStage.toJSONString());
     break;
 

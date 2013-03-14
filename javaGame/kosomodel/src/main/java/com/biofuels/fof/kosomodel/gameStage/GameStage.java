@@ -2,6 +2,8 @@ package com.biofuels.fof.kosomodel.gameStage;
 
 import org.json.simple.*;
 
+import com.biofuels.fof.kosomodel.Game;
+
 // Interface for a game stage. This would be something like Contracts, Management, etc
 //  This stage mechanism encapsulates all of the logic for running the stage on the back
 //  end as well as managing sending the data needed for a given stage to the clients
@@ -9,7 +11,10 @@ import org.json.simple.*;
 //------------------------------------------------------------------------------
 public abstract class GameStage {
 //------------------------------------------------------------------------------
-
+  protected Game game;
+  public GameStage(Game g){
+    game = g;
+  }
   // Checks current game settings about whether this game stage should be entered or skipped
   public abstract boolean ShouldEnter();
 
@@ -18,16 +23,8 @@ public abstract class GameStage {
   // Called when game exits the given stage
   public abstract void Exit();
 
+  public abstract String getName();
   // Messages/Data/Events from client in JSON object format...
 //  public void HandleClientData(JsonNode data);
   public abstract void HandleClientData(JSONObject data);
-
-//  @Override
-//  public final boolean equals(Object o){
-//    return this.getClass().getName().equals(o.getClass().getName());
-////    if(o instanceof GameStage)
-////
-////    else
-////      return false;
-//  }
 }

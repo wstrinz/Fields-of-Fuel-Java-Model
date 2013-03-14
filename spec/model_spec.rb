@@ -234,7 +234,7 @@ describe ModelWrapper do
     @template["deviseName"] = "someone@else.com"
     res = askActor(JoinGameMessage)
     unless res["result"]
-      puts "\n no result field for rejoin test, probably concurrency problem"
+      # puts "\n no result field for rejoin test, probably concurrency problem"
       "#{res}"
     end
     res["result"].should == false
@@ -353,7 +353,6 @@ describe ModelWrapper do
     reply = askActor(GenericMessage, 1)
     reply["event"].should == "advanceStage"
     reply["stageNumber"].should > 0
-    reply["stageName"].is_a? String
 
     # puts "advanced stage"
     reset_template!
@@ -362,5 +361,64 @@ describe ModelWrapper do
     @template["event"] = "getGameInfo"
     reply = askActor(GenericMessage, 1)
     reply["stage"].should > 0
+  end
+
+  it "does not crash when a change settings message is sent before any farms exist" do
+    @template["event"] = "changeSettings"
+    @template["fieldCount"] = 2
+    # works for now, but should write a test
+  end
+
+  it "updates game settings when a change settings message is sent" do
+    @template["event"] = "changeSettings"
+    @template["fieldCount"] = 2
+    @template["contractsOn"] = false
+    @template["mgmtOptsOn"] = false
+    askActor(GenericMessage, 0)
+
+    reset_template!
+    @template["event"] = "advanceStage"
+
+    askActor(GenericMessage, 1)["stageNumber"].should == 1 #1
+    askActor(GenericMessage, 1) #2
+    askActor(GenericMessage, 1)["stageNumber"].should == 0 #0
+  end
+
+  it "loops to first stage after round is over" do
+    @template["event"] = "changeSettings"
+    @template["fieldCount"] = 2
+    @template["contractsOn"] = true
+    @template["mgmtOptsOn"] = true
+    askActor(GenericMessage, 0)
+
+    reset_template!
+    @template["event"] = "getGameInfo"
+    reply = askActor(GenericMessage, 1)
+    reply["stage"].should == 0
+    reply["enabledStages"].should_not be nil
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)["stageNumber"].should == 1
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)["stageNumber"].should == 2
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)["stageNumber"].should == 3
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)["stageNumber"].should == 4
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)["stageNumber"].should == 0
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)["stageNumber"].should == 1
   end
 end

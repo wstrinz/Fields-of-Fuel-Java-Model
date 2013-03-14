@@ -149,7 +149,11 @@ public class Game {
 
   public void changeSettings(int fields, boolean contracts, boolean management) {
     // TODO Auto-generated method stub
-    int currFields = ((Farm)farms.values().toArray()[0]).getFields().size();
+    int currFields = 2;
+    if(farms.size()>0){
+      currFields = ((Farm)farms.values().toArray()[0]).getFields().size();
+    }
+
     if(fields < currFields){
       System.out.println("destroying fields not implemented yet");
     }
@@ -162,6 +166,7 @@ public class Game {
     }
     this.contracts = contracts;
     this.management = management;
+    roundManager.resetStages();
   }
 
   public List<Field> getFields(Integer clientID) {
@@ -189,6 +194,16 @@ public class Game {
   public void advanceStage() {
     // TODO Auto-generated method stub
     roundManager.AdvanceStage();
+  }
+
+  public boolean isFinalRound() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  public String getStageName() {
+    // TODO Auto-generated method stub
+    return roundManager.getCurrentStageName();
   }
 
 
