@@ -183,22 +183,13 @@ public class HandlerHelper {
     break;
 
     case "getGameInfo":
-      int year = games.get(roomID).getYear();
-      int stage = games.get(roomID).getStageNumber();
-      List<String> enabledStages = games.get(roomID).getEnabledStages();
-//      System.out.println(enabledStages.toString());
-      JSONObject replyGameInfo = new JSONObject();
-      replyGameInfo.put("event", "getGameInfo");
-      replyGameInfo.put("year", year);
-      replyGameInfo.put("stage", stage);
-      replyGameInfo.put("enabledStages", new JSONArray().addAll(enabledStages));
-      sendMessage(replyGameInfo.toJSONString());
+      sendGetGameInfo(roomID, clientID);
     break;
 
     case "advanceStage":
       games.get(roomID).advanceStage();
 
-      stage = games.get(roomID).getStageNumber();
+      int stage = games.get(roomID).getStageNumber();
       String roundName = games.get(roomID).getStageName();
       JSONObject replyAdvanceStage = new JSONObject();
       replyAdvanceStage.put("event", "advanceStage");
@@ -225,17 +216,19 @@ public class HandlerHelper {
           }
 
           msg.put("fields", list);
-          sendGetFarmInfo(roomID, fa.getClientID());
+          sendGetFarmInfo(fa.getClientID(), roomID, fa.getClientID());
+
           sendMessage(msg.toJSONString());
 
         }
+        sendGetGameInfo(roomID, roomID);
       }
 
 
     break;
 
     case "getFarmInfo":
-      sendGetFarmInfo(roomID, clientID);
+      sendGetFarmInfo(clientID, roomID, clientID);
 //      int earnings = games.get(roomID).getFarm(clientID).getCapital();
 //      int earningsRank = games.get(roomID).getCapitalRank(clientID);
 //      JSONObject replyGetFarmInfo = new JSONObject();
@@ -348,7 +341,7 @@ public class HandlerHelper {
   }
 
   @SuppressWarnings("unchecked")
-  public void sendGetFarmInfo(String roomID, int clientID){
+  public void sendGetFarmInfo(int clientID, String roomID,  Object sendAddr){
 //    if(roomID == null)
 //      System.out.println("null room id");
 //    else
@@ -361,8 +354,25 @@ public class HandlerHelper {
     replyGetFarmInfo.put("event", "getFarmInfo");
     replyGetFarmInfo.put("capital", earnings);
     replyGetFarmInfo.put("capitalRank", earningsRank);
-    replyGetFarmInfo.put("clientID", clientID);
+    replyGetFarmInfo.put("clientID", sendAddr);
     sendMessage(replyGetFarmInfo.toJSONString());
+  }
+
+  @SuppressWarnings("unchecked")
+  public void sendGetGameInfo(String roomID, Object sendAddr){
+    int year = games.get(roomID).getYear();
+    int stage = games.get(roomID).getStageNumber();
+    List<String> enabledStages = games.get(roomID).getEnabledStages();
+    JSONArray stages = new JSONArray();
+    stages.addAll(enabledStages);
+//    System.out.println(enabledStages.toString());
+    JSONObject replyGameInfo = new JSONObject();
+    replyGameInfo.put("event", "getGameInfo");
+    replyGameInfo.put("year", year);
+    replyGameInfo.put("stage", stage);
+    replyGameInfo.put("enabledStages", stages);
+    replyGameInfo.put("clientID", sendAddr);
+    sendMessage(replyGameInfo.toJSONString());
   }
 
 }
