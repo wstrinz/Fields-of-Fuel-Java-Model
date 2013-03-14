@@ -70,7 +70,7 @@ public class RoundManager {
     return getEnabledStages().size();
   }
 
-  private List<GameStage> getEnabledStages(){
+  public List<GameStage> getEnabledStages(){
     ArrayList<GameStage> stages = new ArrayList<>();
     for(GameStage s:mGameStageSequence){
       if(s.ShouldEnter())

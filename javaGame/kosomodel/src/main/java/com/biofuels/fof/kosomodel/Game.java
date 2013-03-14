@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.biofuels.fof.kosomodel.gameStage.GameStage;
+
 
 
 
@@ -186,9 +188,12 @@ public class Game {
 
   public List<String> getEnabledStages() {
     // TODO Auto-generated method stub
-    ArrayList<String> rounds = new ArrayList<String>();
-    rounds.add("plant");
-    return rounds;
+    ArrayList<String> ret = new ArrayList<String>();
+    List<GameStage> stages = roundManager.getEnabledStages();
+    for (GameStage s:stages){
+      ret.add(s.getName());
+    }
+    return ret;
   }
 
   public void advanceStage() {
