@@ -206,5 +206,36 @@ public class Game {
     return roundManager.getCurrentStageName();
   }
 
+  public int getCapitalRank(Integer clientID) {
+    // TODO Auto-generated method stub
+    return -1;
+  }
+
+  public void sellFarmerCrops() {
+    // TODO Auto-generated method stub
+    for(Farm f:farms.values()){
+      int profit = 0;
+      for(Field fi:f.getFields()){
+        if(fi.getCrop().equals(Crop.CORN)){
+          profit += 2000;
+        }
+        else if(fi.getCrop().equals(Crop.GRASS)){
+          profit += 300;
+        }
+      }
+      f.setCapital(f.getCapital()+profit);
+    }
+  }
+
+  public void clearFields() {
+    // TODO Auto-generated method stub
+    for(Farm f:farms.values()){
+      for(Field fi:f.getFields()){
+        if(fi.getCrop().equals(Crop.CORN))
+          fi.setCrop(Crop.FALLOW);
+      }
+    }
+  }
+
 
 }

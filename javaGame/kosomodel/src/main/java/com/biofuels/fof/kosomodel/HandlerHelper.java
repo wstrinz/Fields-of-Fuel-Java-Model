@@ -206,7 +206,44 @@ public class HandlerHelper {
       replyAdvanceStage.put("stageName", roundName);
       replyAdvanceStage.put("clientID", roomID);
       sendMessage(replyAdvanceStage.toJSONString());
+
+      if (stage == 0){
+        for(Farm fa:games.get(roomID).getFarms()){
+          list = new JSONArray();
+          msg = new JSONObject();
+          //JSONObject fields = new JSONObject();
+          msg.put("event", "loadFromServer");
+          msg.put("clientID", fa.getClientID());
+
+          for(Field f:fa.getFields()){
+            JSONObject thisfield = new JSONObject();
+            thisfield.put("crop",f.getCrop().toString());
+            thisfield.put("fertilizer", f.isFertilize());
+            thisfield.put("pesticide", f.isPesticide());
+            thisfield.put("tillage",f.isTill());
+            list.add(thisfield);
+          }
+
+          msg.put("fields", list);
+          sendGetFarmInfo(roomID, fa.getClientID());
+          sendMessage(msg.toJSONString());
+
+        }
+      }
+
+
     break;
+
+    case "getFarmInfo":
+      sendGetFarmInfo(roomID, clientID);
+//      int earnings = games.get(roomID).getFarm(clientID).getCapital();
+//      int earningsRank = games.get(roomID).getCapitalRank(clientID);
+//      JSONObject replyGetFarmInfo = new JSONObject();
+//      replyGetFarmInfo.put("event", "getFarmInfo");
+//      replyGetFarmInfo.put("capital", earnings);
+//      replyGetFarmInfo.put("capitalRank", earningsRank);
+//      sendMessage(replyGetFarmInfo.toJSONString());
+      break;
 
     case "joinRoom":
       boolean roomExist = roomExists(roomName);
@@ -308,6 +345,24 @@ public class HandlerHelper {
   public void setListener(ActorRef actor) {
     // TODO Auto-generated method stub
     this.listener = actor;
+  }
+
+  @SuppressWarnings("unchecked")
+  public void sendGetFarmInfo(String roomID, int clientID){
+//    if(roomID == null)
+//      System.out.println("null room id");
+//    else
+//      System.out.println(roomID);
+//
+//    System.out.println(clientID);
+    int earnings = games.get(roomID).getFarm(clientID).getCapital();
+    int earningsRank = games.get(roomID).getCapitalRank(clientID);
+    JSONObject replyGetFarmInfo = new JSONObject();
+    replyGetFarmInfo.put("event", "getFarmInfo");
+    replyGetFarmInfo.put("capital", earnings);
+    replyGetFarmInfo.put("capitalRank", earningsRank);
+    replyGetFarmInfo.put("clientID", clientID);
+    sendMessage(replyGetFarmInfo.toJSONString());
   }
 
 }

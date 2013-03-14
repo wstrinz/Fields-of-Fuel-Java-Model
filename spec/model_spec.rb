@@ -369,7 +369,7 @@ describe ModelWrapper do
     # works for now, but should write a test
   end
 
-  it "updates game settings when a change settings message is sent" do
+  it "resets stage  and updates game settings when a change settings message is sent" do
     @template["event"] = "changeSettings"
     @template["fieldCount"] = 2
     @template["contractsOn"] = false
@@ -400,25 +400,64 @@ describe ModelWrapper do
     reset_template!
     @template["event"] = "advanceStage"
     askActor(GenericMessage, 1)["stageNumber"].should == 1
-
-    reset_template!
-    @template["event"] = "advanceStage"
     askActor(GenericMessage, 1)["stageNumber"].should == 2
-
-    reset_template!
-    @template["event"] = "advanceStage"
     askActor(GenericMessage, 1)["stageNumber"].should == 3
-
-    reset_template!
-    @template["event"] = "advanceStage"
     askActor(GenericMessage, 1)["stageNumber"].should == 4
-
-    reset_template!
-    @template["event"] = "advanceStage"
     askActor(GenericMessage, 1)["stageNumber"].should == 0
-
-    reset_template!
-    @template["event"] = "advanceStage"
     askActor(GenericMessage, 1)["stageNumber"].should == 1
   end
+
+  it "clears fields, sells crops, and calculates farmer capital after grow phase" do
+    askActor(JoinGameMessage)
+
+    reset_template!
+    @template["event"] = "changeSettings"
+    @template["fieldCount"] = 2
+    @template["contractsOn"] = false
+    @template["mgmtOptsOn"] = false
+    askActor(GenericMessage, 0)
+
+    reset_template!
+    @template["event"] = "getFarmInfo"
+    startCapital = askActor(GenericMessage, 1)["capital"]
+    startCapital.should >= 0
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)["stageNumber"].should == 1 #grow
+    askActor(GenericMessage, 1) #2 #wrapup
+
+    reset_template!
+    @template["event"] = "getFarmInfo"
+    askActor(GenericMessage, 1)["capital"].should > startCapital
+
+    reset_template!
+    fields = askActor(LoadFieldsMessage)["fields"]
+    fields[0]["crop"].should == "FALLOW"
+  end
+
+  it "should only clear corn fields" do
+    askActor(JoinGameMessage)
+
+    reset_template!
+    @template["event"] = "changeSettings"
+    @template["fieldCount"] = 2
+    @template["contractsOn"] = false
+    @template["mgmtOptsOn"] = false
+    askActor(GenericMessage, 0)
+
+    reset_template!
+    @template["crop"] = "grass"
+    askActor(PlantMessage, 0)
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)["stageNumber"].should == 1    #grow
+    askActor(GenericMessage, 1)                               #wrapup
+
+    reset_template!
+    fields = askActor(LoadFieldsMessage)["fields"]
+    fields[0]["crop"].should == "GRASS"
+  end
+
 end

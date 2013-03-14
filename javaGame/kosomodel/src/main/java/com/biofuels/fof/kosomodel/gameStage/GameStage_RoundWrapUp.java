@@ -13,7 +13,11 @@ public class GameStage_RoundWrapUp extends GameStage {
     // TODO Auto-generated constructor stub
   }
   public boolean ShouldEnter() {return true; }
-  public void Enter() {}
+  public void Enter() {
+    game.sellFarmerCrops();
+    game.clearFields();
+
+  }
   public void Exit() {}
   public void HandleClientData(JSONObject data) {}
   @Override

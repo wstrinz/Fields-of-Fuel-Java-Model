@@ -8,7 +8,7 @@ public class Farm {
   private int clientID;
 //  private Field[] fields;
   private LinkedList<Field> fields;
-  private int capital;
+  private int capital=10000;
   private int envScore;
   private int socScore;
   private int econScore;
@@ -131,6 +131,11 @@ public class Farm {
 
     }
 
+  }
+
+  public void setCapital(int i) {
+    // TODO Auto-generated method stub
+    capital = i;
   }
 
 
