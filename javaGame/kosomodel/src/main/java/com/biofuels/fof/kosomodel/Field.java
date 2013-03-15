@@ -8,11 +8,12 @@ public class Field {
 
   private Crop crop;
   private ManagementOptions management;
+  private double SOC;
 
   public Field() {
     setCrop(Crop.CORN);
     management = new ManagementOptions();
-    // TODO Auto-generated constructor stub
+    this.SOC=50;
   }
 
   private Crop randomCrop() {
@@ -74,6 +75,26 @@ public class Field {
 
   public void setManagement(ManagementOptions management) {
     this.management = management;
+  }
+
+  public void updateSOM() {
+    int cornVal = this.crop == crop.CORN ? 1 : 0;
+    int grassVal = this.crop == crop.GRASS ? 1 : 0;
+    int coverVal = this.crop == crop.COVER ? 1 : 0;
+    int noTill = this.management.till ? 0 : 1;
+    double B0 = 0.8;
+    double B1 = 1.17;
+    double B2 = 1.04;
+    double B3 = 0; //1.1;
+    SOC = SOC * (((B0 * cornVal) + (B1 * grassVal) + (B2 * coverVal) + (B3 * noTill))); /// 20);
+  }
+
+  public double getSOM() {
+    return SOC;
+  }
+
+  public void setSOM(float sOC) {
+    SOC = sOC;
   }
 
 

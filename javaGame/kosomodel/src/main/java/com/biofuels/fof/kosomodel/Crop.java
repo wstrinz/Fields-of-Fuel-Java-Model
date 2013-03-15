@@ -1,4 +1,4 @@
 package com.biofuels.fof.kosomodel;
 public enum Crop {
-	CORN, GRASS, FALLOW
+  CORN, GRASS, FALLOW, COVER
 }

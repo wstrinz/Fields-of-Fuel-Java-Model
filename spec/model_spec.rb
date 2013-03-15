@@ -460,4 +460,52 @@ describe ModelWrapper do
     fields[0]["crop"].should == "GRASS"
   end
 
+  it "changes soil organic matter with different planting choices" do
+    askActor(JoinGameMessage)
+
+    reset_template!
+    fields = askActor(LoadFieldsMessage)["fields"]
+    fields[0]["SOM"].should_not be nil
+    original_SOM = fields[0]["SOM"]
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+
+    reset_template!
+    fields = askActor(LoadFieldsMessage)["fields"]
+    fields[0]["SOM"].should_not == original_SOM
+  end
+
+  it "gains SOM for switchgrass, loses it for corn" do
+    askActor(JoinGameMessage)
+    reset_template!
+    fields = askActor(LoadFieldsMessage)["fields"]
+    fields[0]["SOM"].should_not be nil
+    original_SOM0 = fields[0]["SOM"]
+    original_SOM1 = fields[1]["SOM"]
+
+    reset_template!
+    @template["crop"] = "grass"
+    askActor(PlantMessage, 0)
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+
+    reset_template!
+    fields = askActor(LoadFieldsMessage)["fields"]
+    fields[0]["SOM"].should > original_SOM0
+    fields[1]["SOM"].should < original_SOM1
+  end
+
+  it "yields different amounts for different soil health levels" do
+
+  end
+
+  it "calculates phosphorous runoff effects from planting decisions" do
+
+  end
 end

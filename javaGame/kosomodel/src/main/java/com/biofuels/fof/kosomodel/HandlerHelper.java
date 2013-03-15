@@ -143,6 +143,7 @@ public class HandlerHelper {
         thisfield.put("fertilizer", f.isFertilize());
         thisfield.put("pesticide", f.isPesticide());
         thisfield.put("tillage",f.isTill());
+        thisfield.put("SOM",f.getSOM());
         list.add(thisfield);
       }
 

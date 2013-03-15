@@ -12,8 +12,8 @@ public class Game {
 
   private final String roomName;
   private final boolean hasPassword;
-  private boolean contracts;
-  private boolean management;
+  private boolean contracts=false;
+  private boolean management=false;
   private final String password;
   private ConcurrentHashMap<Integer, Farm> farms;  //used because doesn't allow annoying null mappings
   private long maxPlayers;
