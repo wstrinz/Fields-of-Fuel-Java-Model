@@ -153,9 +153,17 @@ describe ModelWrapper do
     }
   end
 
-  before(:each) do
+  before(:all) do
     @system = ActorSystem.create("BiofuelsTest")
     @listener = @system.actorOf(Props.new(ModelWrapper), "listener")
+  end
+
+  after(:all) do
+    @system.shutdown
+    @system.await_termination
+  end
+
+  before(:each) do
     @timeout = Timeout.new(Duration.create(3, TimeUnit::SECONDS));
     jside = ActorSystemHelper.new
     @handler = jside.makenew(@system, Handler, "handler")  # = system.actorOf(pro, "counter")
@@ -173,8 +181,8 @@ describe ModelWrapper do
   end
 
   after(:each) do
-    @system.shutdown
-    @system.await_termination
+    stopped = Patterns.gracefulStop(@handler, Duration.create(5, TimeUnit::SECONDS), @system);
+    result = Await.result(stopped, Duration.create(6, TimeUnit::SECONDS));
   end
 
   it "creates and talk to actor" do
@@ -235,7 +243,8 @@ describe ModelWrapper do
     res = askActor(JoinGameMessage)
     unless res["result"]
       # puts "\n no result field for rejoin test, probably concurrency problem"
-      "#{res}"
+      # puts "#{res}"
+      # sleep(1)
     end
     res["result"].should == false
   end
@@ -268,6 +277,7 @@ describe ModelWrapper do
     askActor(JoinGameMessage, 2)
 
     # fields = askActor(LoadFieldsMessage)["fields"]
+    reset_template!
 
     askActor(LoadFieldsMessage)["fields"][0]["crop"].should == "CORN"
   end
@@ -497,8 +507,59 @@ describe ModelWrapper do
 
     reset_template!
     fields = askActor(LoadFieldsMessage)["fields"]
+    # puts fields[0]["SOM"]
+    # puts fields[1]["SOM"]
     fields[0]["SOM"].should > original_SOM0
     fields[1]["SOM"].should < original_SOM1
+  end
+
+  it "sends farm history data" do
+    askActor(JoinGameMessage)
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+
+    reset_template!
+    @template["event"] = "getFarmHistory"
+    reply = askActor(GenericMessage, 1)
+    # puts reply
+
+    field_history = reply["fields"][0][0]
+    field_history["SOM"].should_not be nil
+    field_history["crop"].should_not be nil
+    field_history["yield"].should_not be nil
+    # history.SOM.should_not be nil
+  end
+
+  it "stores multiple years worth of history" do
+    askActor(JoinGameMessage)
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    5.times do
+      askActor(GenericMessage, 1)
+    end
+
+    reset_template!
+    @template["event"] = "getFarmHistory"
+    reply = askActor(GenericMessage, 1)
+    # puts reply
+  end
+
+  it "tracks soil carbon over a number of years" do
+    askActor(JoinGameMessage)
+    reset_template!
+    @template["event"] = "advanceStage"
+    20.times do
+      askActor(GenericMessage, 1)
+    end
+
+    reset_template!
+    askActor(LoadFieldsMessage)["fields"][0]["SOM"].should > 0
+    askActor(LoadFieldsMessage)["fields"][1]["SOM"].should > 0
   end
 
   it "yields different amounts for different soil health levels" do

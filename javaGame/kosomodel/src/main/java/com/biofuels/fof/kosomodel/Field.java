@@ -9,10 +9,12 @@ public class Field {
   private Crop crop;
   private ManagementOptions management;
   private double SOC;
+  private FieldHistory history;
 
   public Field() {
     setCrop(Crop.CORN);
     management = new ManagementOptions();
+    history = new FieldHistory();
     this.SOC=50;
   }
 
@@ -80,7 +82,7 @@ public class Field {
   public void updateSOM() {
     int cornVal = this.crop == crop.CORN ? 1 : 0;
     int grassVal = this.crop == crop.GRASS ? 1 : 0;
-    int coverVal = this.crop == crop.COVER ? 1 : 0;
+    int coverVal = (this.crop == crop.COVER || this.crop == crop.FALLOW) ? 1 : 0;
     int noTill = this.management.till ? 0 : 1;
     double B0 = 0.8;
     double B1 = 1.17;
@@ -93,9 +95,16 @@ public class Field {
     return SOC;
   }
 
-  public void setSOM(float sOC) {
-    SOC = sOC;
+  public void setSOM(float SOC) {
+    this.SOC = SOC;
   }
 
+  public FieldHistory getHistory() {
+    return history;
+  }
+
+  public void addHistoryYear() {
+    history.addYear(SOC, crop, 1); //not yield is a placeholder for now
+  }
 
 }

@@ -239,6 +239,10 @@ public class HandlerHelper {
 //      sendMessage(replyGetFarmInfo.toJSONString());
       break;
 
+    case "getFarmHistory":
+      sendGetFarmHistory(clientID, roomID, clientID);
+      break;
+
     case "joinRoom":
       boolean roomExist = roomExists(roomName);
       boolean shouldMakeNew = false;
@@ -286,8 +290,9 @@ public class HandlerHelper {
       return (room.length()>0 && roomExists(room));
     }*/
 
+
+
   private void sendMessage(String message) {
-    // TODO Auto-generated method stub
     EventMessage msg = new EventMessage(message);
 //    System.out.println("sending " + msg.message);
     listener.tell(msg, handler);
@@ -374,6 +379,32 @@ public class HandlerHelper {
     replyGameInfo.put("enabledStages", stages);
     replyGameInfo.put("clientID", sendAddr);
     sendMessage(replyGameInfo.toJSONString());
+  }
+
+  @SuppressWarnings("unchecked")
+  private void sendGetFarmHistory(Integer clientID, String roomID, Object sendAddr) {
+//    List<Field> fields = games.get(roomID).getFarm(clientID).getFields();
+    JSONObject reply = new JSONObject();
+    JSONArray fields = new JSONArray();
+    for(Field f:games.get(roomID).getFarm(clientID).getFields()){
+      JSONArray seasons = new JSONArray();
+      FieldHistory history = f.getHistory();
+      if(history == null){
+        System.out.println("history null!");
+      }
+      for(FieldHistory.HistoryYear y:history.getHistory()){
+        JSONObject year = new JSONObject();
+        year.put("SOM", y.SOM);
+        year.put("crop", y.crop.toString());
+        year.put("yield", y.yield);
+        seasons.add(year);
+      }
+      fields.add(seasons);
+    }
+    reply.put("event", "getFarmHistory");
+    reply.put("clientID", sendAddr);
+    reply.put("fields", fields);
+    sendMessage(reply.toJSONString());
   }
 
 }

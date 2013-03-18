@@ -39,7 +39,6 @@ public class Game {
     roundManager.Init(this);
     this.maxPlayers = maxPlayers;
     roundManager.AdvanceStage();
-    // TODO Auto-generated constructor stub
   }
 
   public Game(String name, String pass, long maxPlayers) {
@@ -51,7 +50,6 @@ public class Game {
     roundManager = new RoundManager();
     roundManager.Init(this);
     roundManager.AdvanceStage();
-    // TODO Auto-generated constructor stub
   }
 
   public String getRoomName() {
@@ -59,7 +57,7 @@ public class Game {
   }
 
   public boolean hasFarmer(String name) {
-    // TODO Auto-generated method stub
+
     for(Farm f:farms.values()){
       if (f.getName().equals(name))
         return true;
@@ -68,7 +66,6 @@ public class Game {
   }
 
   public void addFarmer(String newPlayer, int clientID) {
-    // TODO Auto-generated method stub
     Farm f = new Farm(newPlayer, 1000);
     f.setClientID(clientID);
     f.getFields().add(new Field());
@@ -114,7 +111,6 @@ public class Game {
   }
 
   public ArrayList<String> getFieldsFor(Integer clientID) {
-    // TODO Auto-generated method stub
     ArrayList<String> cropList = new ArrayList<>();
     for(Field f:farms.get(clientID).getFields()){
       cropList.add(f.getCrop().toString());
@@ -123,12 +119,11 @@ public class Game {
   }
 
   public ArrayList<Farm> getFarms() {
-    // TODO Auto-generated method stub
+
     return new ArrayList<>(farms.values());
   }
 
   public Farm getFarm(String name) {
-    // TODO Auto-generated method stub
     for(Farm f:farms.values()){
       if (f.getName().equals(name))
         return f;
@@ -137,7 +132,7 @@ public class Game {
   }
 
   public void rejoinFarmer(String farmerName, Integer clientID) {
-    // TODO Auto-generated method stub
+
     Farm farm = getFarm(farmerName);
     farms.remove(getFarm(farmerName).getClientID());
     farm.setClientID(clientID);
@@ -145,12 +140,11 @@ public class Game {
   }
 
   public Farm getFarm(Integer clientID) {
-    // TODO Auto-generated method stub
+
     return farms.get(clientID);
   }
 
   public void changeSettings(int fields, boolean contracts, boolean management) {
-    // TODO Auto-generated method stub
     int currFields = 2;
     if(farms.size()>0){
       currFields = ((Farm)farms.values().toArray()[0]).getFields().size();
@@ -172,22 +166,18 @@ public class Game {
   }
 
   public List<Field> getFields(Integer clientID) {
-    // TODO Auto-generated method stub
     return farms.get(clientID).getFields();
   }
 
   public int getYear() {
-    // TODO Auto-generated method stub
     return gameYear;
   }
 
   public int getStageNumber() {
-    // TODO Auto-generated method stub
     return roundManager.getCurrentStageNumber();
   }
 
   public List<String> getEnabledStages() {
-    // TODO Auto-generated method stub
     ArrayList<String> ret = new ArrayList<String>();
     List<GameStage> stages = roundManager.getEnabledStages();
     for (GameStage s:stages){
@@ -197,27 +187,22 @@ public class Game {
   }
 
   public void advanceStage() {
-    // TODO Auto-generated method stub
     roundManager.AdvanceStage();
   }
 
   public boolean isFinalRound() {
-    // TODO Auto-generated method stub
     return false;
   }
 
   public String getStageName() {
-    // TODO Auto-generated method stub
     return roundManager.getCurrentStageName();
   }
 
   public int getCapitalRank(Integer clientID) {
-    // TODO Auto-generated method stub
     return -1;
   }
 
   public void sellFarmerCrops() {
-    // TODO Auto-generated method stub
     for(Farm f:farms.values()){
       int profit = 0;
       for(Field fi:f.getFields()){
@@ -233,7 +218,6 @@ public class Game {
   }
 
   public void clearFields() {
-    // TODO Auto-generated method stub
     for(Farm f:farms.values()){
       for(Field fi:f.getFields()){
         if(fi.getCrop().equals(Crop.CORN))
