@@ -562,6 +562,50 @@ describe ModelWrapper do
     askActor(LoadFieldsMessage)["fields"][1]["SOM"].should > 0
   end
 
+  it "advances stage when all players are ready" do
+    askActor(JoinGameMessage)
+    reset_template!
+    @template["event"] = "getGameInfo"
+    reply = askActor(GenericMessage, 1)
+    startStage = reply["stage"]
+
+    reset_template!
+    @template["event"] = "farmerReady"
+    askActor(GenericMessage, 0)
+
+    reset_template!
+    @template["event"] = "getGameInfo"
+    reply = askActor(GenericMessage, 1)
+    reply["stage"].should > startStage
+  end
+
+  it "resets ready list when stage advances" do
+    askActor(JoinGameMessage)
+    reset_template!
+    @template["event"] = "getGameInfo"
+    reply = askActor(GenericMessage, 1)
+    startStage = reply["stage"]
+
+    reset_template!
+    @template["event"] = "farmerReady"
+    askActor(GenericMessage, 0)
+
+    reset_template!
+    @template["event"] = "getGameInfo"
+    reply = askActor(GenericMessage, 1)
+    nextStage = reply["stage"]
+    nextStage.should > startStage
+
+    reset_template!
+    @template["event"] = "farmerReady"
+    askActor(GenericMessage, 0)
+
+    reset_template!
+    @template["event"] = "getGameInfo"
+    reply = askActor(GenericMessage, 1)
+    reply["stage"].should > nextStage
+  end
+
   it "yields different amounts for different soil health levels" do
 
   end

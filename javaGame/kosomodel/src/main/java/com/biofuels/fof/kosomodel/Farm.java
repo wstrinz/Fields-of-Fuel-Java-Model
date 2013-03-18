@@ -15,6 +15,7 @@ public class Farm {
   private String currentUser;
   private boolean acceptCornContract;
   private boolean acceptSwitchgrassContract;
+  private boolean ready;
 
 
   public Farm(String name, int capital) {
@@ -136,6 +137,14 @@ public class Farm {
   public void setCapital(int i) {
     // TODO Auto-generated method stub
     capital = i;
+  }
+
+  public boolean isReady() {
+    return ready;
+  }
+
+  public void setReady(boolean ready) {
+    this.ready = ready;
   }
 
 

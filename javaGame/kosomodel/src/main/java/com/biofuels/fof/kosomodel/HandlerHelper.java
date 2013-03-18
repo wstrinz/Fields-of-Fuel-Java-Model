@@ -188,45 +188,16 @@ public class HandlerHelper {
     break;
 
     case "advanceStage":
-      games.get(roomID).advanceStage();
-
-      int stage = games.get(roomID).getStageNumber();
-      String roundName = games.get(roomID).getStageName();
-      JSONObject replyAdvanceStage = new JSONObject();
-      replyAdvanceStage.put("event", "advanceStage");
-      replyAdvanceStage.put("stageNumber", stage);
-      replyAdvanceStage.put("stageName", roundName);
-      replyAdvanceStage.put("clientID", roomID);
-      sendMessage(replyAdvanceStage.toJSONString());
-
-      if (stage == 0){
-        for(Farm fa:games.get(roomID).getFarms()){
-          list = new JSONArray();
-          msg = new JSONObject();
-          //JSONObject fields = new JSONObject();
-          msg.put("event", "loadFromServer");
-          msg.put("clientID", fa.getClientID());
-
-          for(Field f:fa.getFields()){
-            JSONObject thisfield = new JSONObject();
-            thisfield.put("crop",f.getCrop().toString());
-            thisfield.put("fertilizer", f.isFertilize());
-            thisfield.put("pesticide", f.isPesticide());
-            thisfield.put("tillage",f.isTill());
-            list.add(thisfield);
-          }
-
-          msg.put("fields", list);
-          sendGetFarmInfo(fa.getClientID(), roomID, fa.getClientID());
-
-          sendMessage(msg.toJSONString());
-
-        }
-        sendGetGameInfo(roomID, roomID);
-      }
-
-
+      doAdvanceStage(roomID);
     break;
+
+    case "farmerReady":
+      Game g = games.get(roomID);
+      g.getFarm(clientID).setReady(true);
+      g.farmerReady();
+      if(g.getReadyFarmers() == g.getFarms().size())
+        doAdvanceStage(roomID);
+      break;
 
     case "getFarmInfo":
       sendGetFarmInfo(clientID, roomID, clientID);
@@ -291,6 +262,50 @@ public class HandlerHelper {
     }*/
 
 
+
+  @SuppressWarnings("unchecked")
+  private void doAdvanceStage(String roomID) {
+    // TODO Auto-generated method stub
+//    System.out.println("advancing");
+    games.get(roomID).advanceStage();
+
+    int stage = games.get(roomID).getStageNumber();
+    String roundName = games.get(roomID).getStageName();
+    JSONObject replyAdvanceStage = new JSONObject();
+    replyAdvanceStage.put("event", "advanceStage");
+    replyAdvanceStage.put("stageNumber", stage);
+    replyAdvanceStage.put("stageName", roundName);
+    replyAdvanceStage.put("clientID", roomID);
+    sendMessage(replyAdvanceStage.toJSONString());
+
+
+
+    if (stage == 0){
+      for(Farm fa:games.get(roomID).getFarms()){
+        JSONArray list = new JSONArray();
+        JSONObject msg = new JSONObject();
+        //JSONObject fields = new JSONObject();
+        msg.put("event", "loadFromServer");
+        msg.put("clientID", fa.getClientID());
+
+        for(Field f:fa.getFields()){
+          JSONObject thisfield = new JSONObject();
+          thisfield.put("crop",f.getCrop().toString());
+          thisfield.put("fertilizer", f.isFertilize());
+          thisfield.put("pesticide", f.isPesticide());
+          thisfield.put("tillage",f.isTill());
+          list.add(thisfield);
+        }
+
+        msg.put("fields", list);
+        sendGetFarmInfo(fa.getClientID(), roomID, fa.getClientID());
+
+        sendMessage(msg.toJSONString());
+
+      }
+      sendGetGameInfo(roomID, roomID);
+    }
+  }
 
   private void sendMessage(String message) {
     EventMessage msg = new EventMessage(message);

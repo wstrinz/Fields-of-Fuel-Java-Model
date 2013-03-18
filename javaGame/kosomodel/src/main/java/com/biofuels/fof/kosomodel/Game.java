@@ -18,6 +18,7 @@ public class Game {
   private ConcurrentHashMap<Integer, Farm> farms;  //used because doesn't allow annoying null mappings
   private long maxPlayers;
   private RoundManager roundManager;
+  private int readyFarmers;
   private int gameYear=0;
 
   /*  private class RoundManager{
@@ -149,6 +150,10 @@ public class Game {
     if(farms.size()>0){
       currFields = ((Farm)farms.values().toArray()[0]).getFields().size();
     }
+    for(Farm fa:farms.values()){
+      fa.setReady(false);
+    }
+    resetReadyFarmers();
 
     if(fields < currFields){
       System.out.println("destroying fields not implemented yet");
@@ -188,6 +193,10 @@ public class Game {
 
   public void advanceStage() {
     roundManager.AdvanceStage();
+    for(Farm fa:farms.values()){
+      fa.setReady(false);
+    }
+    resetReadyFarmers();
   }
 
   public boolean isFinalRound() {
@@ -224,6 +233,19 @@ public class Game {
           fi.setCrop(Crop.FALLOW);
       }
     }
+  }
+
+  public void farmerReady() {
+    // TODO Auto-generated method stub
+    readyFarmers++;
+  }
+
+  public int getReadyFarmers() {
+    return readyFarmers;
+  }
+
+  public void resetReadyFarmers() {
+    this.readyFarmers = 0;
   }
 
 
