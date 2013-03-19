@@ -20,6 +20,7 @@ public class Game {
   private RoundManager roundManager;
   private int readyFarmers;
   private int gameYear=0;
+  private int fieldsPerFarm=2;
 
   /*  private class RoundManager{
 
@@ -146,7 +147,8 @@ public class Game {
   }
 
   public void changeSettings(int fields, boolean contracts, boolean management) {
-    int currFields = 2;
+    int currFields = fieldsPerFarm;
+    fieldsPerFarm = fields;
     if(farms.size()>0){
       currFields = ((Farm)farms.values().toArray()[0]).getFields().size();
     }
@@ -246,6 +248,10 @@ public class Game {
 
   public void resetReadyFarmers() {
     this.readyFarmers = 0;
+  }
+
+  public int getFieldsPerFarm() {
+    return fieldsPerFarm;
   }
 
 

@@ -96,7 +96,7 @@ module TestMessages
 
     attr_reader :test_message
 
-    def initialize(handler, options={}, expected_replies=2)
+    def initialize(handler, options={}, expected_replies=3)
       message = Hash.new
       message["clientID"] = "0"
       message["roomName"] = "noName"

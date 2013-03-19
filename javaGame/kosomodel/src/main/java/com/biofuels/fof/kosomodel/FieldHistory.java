@@ -8,6 +8,9 @@ public class FieldHistory {
     public double SOM;
     public Crop crop;
     public double yield;
+    boolean fertilizer;
+    boolean pesticide;
+    boolean till;
   }
 
   private LinkedList<HistoryYear> history;
@@ -18,7 +21,7 @@ public class FieldHistory {
     return history;
   }
 
-  public void addYear(double SOM, Crop crop, double yield){
+  public void addYear(double SOM, Crop crop, double yield, boolean fertilizer, boolean pesticide, boolean till){
     HistoryYear newYear = new HistoryYear();
     newYear.year = history.size();
     newYear.crop = crop;

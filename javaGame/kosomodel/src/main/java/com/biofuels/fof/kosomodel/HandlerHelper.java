@@ -234,6 +234,9 @@ public class HandlerHelper {
           games.get(roomName).rejoinFarmer(farmerName, clientID);
         }
         sendMessage(buildJson(clientID.toString(), "joinRoom","result",true,"roomName",roomName,"userName",(String)eventObj.get("userName")));
+        sendCurrentSettings(clientID, roomID, clientID);
+
+
         list = new JSONArray();
         msg = new JSONObject();
         for(Farm f:games.get(roomName).getFarms()){
@@ -412,6 +415,9 @@ public class HandlerHelper {
         year.put("SOM", y.SOM);
         year.put("crop", y.crop.toString());
         year.put("yield", y.yield);
+        year.put("fertilizer", y.fertilizer);
+        year.put("pesticide", y.pesticide);
+        year.put("till", y.till);
         seasons.add(year);
       }
       fields.add(seasons);
@@ -422,4 +428,14 @@ public class HandlerHelper {
     sendMessage(reply.toJSONString());
   }
 
+  @SuppressWarnings("unchecked")
+  private void sendCurrentSettings(Integer clientID, String roomID, Object sendAddr){
+    JSONObject reply = new JSONObject();
+    reply.put("event", "changeSettings");
+    reply.put("contractsOn", games.get(roomID).isContracts());
+    reply.put("mgmtOptsOn", games.get(roomID).isManagement());
+    reply.put("fields", games.get(roomID).getFieldsPerFarm());
+    reply.put("clientID", sendAddr);
+    sendMessage(reply.toJSONString());
+  }
 }

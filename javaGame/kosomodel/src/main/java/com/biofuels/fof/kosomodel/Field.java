@@ -89,6 +89,8 @@ public class Field {
     double B2 = 1.04;
     double B3 = 0; //1.1;
     SOC = SOC * (((B0 * cornVal) + (B1 * grassVal) + (B2 * coverVal) + (B3 * noTill))); /// 20);
+    if (SOC > 150) //set max of 150 for now (note: not in official model spec)
+      SOC = 150;
   }
 
   public double getSOM() {
@@ -104,7 +106,7 @@ public class Field {
   }
 
   public void addHistoryYear() {
-    history.addYear(SOC, crop, 1); //not yield is a placeholder for now
+    history.addYear(SOC, crop, 1, isFertilize(), isPesticide(), isTill()); //note yield is a placeholder for now
   }
 
 }

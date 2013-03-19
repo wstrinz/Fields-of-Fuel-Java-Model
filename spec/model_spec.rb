@@ -267,14 +267,15 @@ describe ModelWrapper do
 
   it "sends out both confirmation and room info on a successful join" do
 
-    joinReply = askActor(JoinGameMessage, 2)
+    joinReply = askActor(JoinGameMessage, 3)
+    # puts "r: #{joinReply}"
     joinReply[0]["result"].should == true
-    joinReply[1]["event"].should == "farmerList"
-    joinReply[1]["Farmers"][0]["name"].should == @template["userName"]
+    joinReply[2]["event"].should == "farmerList"
+    joinReply[2]["Farmers"][0]["name"].should == @template["userName"]
   end
 
   it "is assigned 2 fields with corn on loading" do
-    askActor(JoinGameMessage, 2)
+    askActor(JoinGameMessage)
 
     # fields = askActor(LoadFieldsMessage)["fields"]
     reset_template!
@@ -283,7 +284,7 @@ describe ModelWrapper do
   end
 
   it "can plant switchgrass on first field" do
-    askActor(JoinGameMessage, 2)
+    askActor(JoinGameMessage)
     @template["crop"] = "grass"
     askActor(PlantMessage, 0)
     fields = askActor(LoadFieldsMessage)["fields"]
@@ -376,7 +377,7 @@ describe ModelWrapper do
   it "does not crash when a change settings message is sent before any farms exist" do
     @template["event"] = "changeSettings"
     @template["fieldCount"] = 2
-    # works for now, but should write a test
+    # works for now, but should write a real test
   end
 
   it "resets stage  and updates game settings when a change settings message is sent" do
