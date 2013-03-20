@@ -10,6 +10,7 @@ public class Field {
   private ManagementOptions management;
   private double SOC;
   private FieldHistory history;
+  private double lastYield;
 
   public Field() {
     setCrop(Crop.CORN);
@@ -19,7 +20,6 @@ public class Field {
   }
 
   private Crop randomCrop() {
-    // TODO Auto-generated method stub
     Random r = new Random();
     if(r.nextInt(2)==0)
       return Crop.CORN;
@@ -37,9 +37,9 @@ public class Field {
         fertilize = opts[2];
     }
 
-    private boolean till;
-    private boolean pesticide;
-    private boolean fertilize;
+    private boolean till=true; //TODO does this make sense?
+    private boolean pesticide=false;
+    private boolean fertilize=false;
   }
 
   public Crop getCrop() {
@@ -80,20 +80,22 @@ public class Field {
   }
 
   public void updateSOM() {
-    int cornVal = this.crop == crop.CORN ? 1 : 0;
-    int grassVal = this.crop == crop.GRASS ? 1 : 0;
-    int coverVal = (this.crop == crop.COVER || this.crop == crop.FALLOW) ? 1 : 0;
+    int cornVal = this.crop == Crop.CORN ? 1 : 0;
+    int grassVal = this.crop == Crop.GRASS ? 1 : 0;
+    int coverVal = (this.crop == Crop.COVER || this.crop == Crop.FALLOW) ? 1 : 0;
     int noTill = this.management.till ? 0 : 1;
     double B0 = 0.8;
     double B1 = 1.17;
     double B2 = 1.04;
-    double B3 = 0; //1.1;
+    double B3 = 1.1;
     SOC = SOC * (((B0 * cornVal) + (B1 * grassVal) + (B2 * coverVal) + (B3 * noTill))); /// 20);
-    if (SOC > 150) //set max of 150 for now (note: not in official model spec)
-      SOC = 150;
+
+    int MAXSOC = 300 ;
+    if (SOC > MAXSOC) //set max of 150 for now (note: not in official model spec)
+      SOC = MAXSOC;
   }
 
-  public double getSOM() {
+  public double getSOC() {
     return SOC;
   }
 
@@ -106,7 +108,34 @@ public class Field {
   }
 
   public void addHistoryYear() {
-    history.addYear(SOC, crop, 1, isFertilize(), isPesticide(), isTill()); //note yield is a placeholder for now
+    history.addYear(SOC, crop, calculateYield(), isFertilize(), isPesticide(), isTill());
+  }
+
+  public double getLastYield() {
+    return lastYield;
+  }
+
+  public void setLastYield(double lastYield) {
+    this.lastYield = lastYield;
+  }
+
+  public double calculateYield() {
+    double B0Corn = 0.1377;
+    double B0Grass = -0.9556;
+    double B0Cover = -0.9556;
+
+    double B1Corn = 3.4142;
+    double B1Grass = 2.4093;
+    double B1Cover = 2.40141;
+
+    int cornVal = this.getCrop() == Crop.CORN ? 1 : 0;
+    int grassVal = this.getCrop() == Crop.GRASS ? 1 : 0;
+    int coverVal = (this.getCrop() == Crop.COVER || this.getCrop() == Crop.FALLOW) ? 1 : 0;
+
+    double B0 = B0Corn * cornVal + B0Grass * grassVal + B0Cover * coverVal;
+    double B1 = B1Corn * cornVal + B1Grass * grassVal + B1Cover * coverVal;
+
+    return B0 + B1 * Math.log(this.getSOC());
   }
 
 }

@@ -128,7 +128,9 @@ end
 describe ModelWrapper do
 
   def askActor(message_type, expect_count=1, options=@template)
-    future = Patterns.ask(@listener, message_type.new(@handler, options, expect_count), @timeout)
+    message = message_type.new(@handler, options, expect_count)
+    # puts "asking #{message.test_message.event.message}"
+    future = Patterns.ask(@listener, message, @timeout)
     if expect_count != 0
       result = Await.result(future, @timeout.duration())
       if result.is_a? Array
@@ -139,6 +141,7 @@ describe ModelWrapper do
     else
       result = "No result asked for!"
     end
+    # reset_template!
     result
   end
 
@@ -242,7 +245,7 @@ describe ModelWrapper do
     @template["deviseName"] = "someone@else.com"
     res = askActor(JoinGameMessage)
     unless res["result"]
-      # puts "\n no result field for rejoin test, probably concurrency problem"
+      # puts "\n no result field for rejoin test, probably concurrency proble1"
       # puts "#{res}"
       # sleep(1)
     end
@@ -572,7 +575,10 @@ describe ModelWrapper do
 
     reset_template!
     @template["event"] = "farmerReady"
-    askActor(GenericMessage, 0)
+    askActor(GenericMessage, 1)
+
+    #should not be here! some sort of concurrency issue
+    # sleep(0.01)
 
     reset_template!
     @template["event"] = "getGameInfo"
@@ -589,7 +595,11 @@ describe ModelWrapper do
 
     reset_template!
     @template["event"] = "farmerReady"
-    askActor(GenericMessage, 0)
+    askActor(GenericMessage, 1)
+    #should not be here! some sort of concurrency issue
+    # sleep(0.01)
+
+
 
     reset_template!
     @template["event"] = "getGameInfo"
@@ -597,9 +607,13 @@ describe ModelWrapper do
     nextStage = reply["stage"]
     nextStage.should > startStage
 
+
     reset_template!
     @template["event"] = "farmerReady"
-    askActor(GenericMessage, 0)
+    askActor(GenericMessage, 1)
+    #should not be here! some sort of concurrency issue
+    # sleep(0.01)
+
 
     reset_template!
     @template["event"] = "getGameInfo"
@@ -608,10 +622,174 @@ describe ModelWrapper do
   end
 
   it "yields different amounts for different soil health levels" do
+    askActor(JoinGameMessage)
+
+    # reset_template!
+    # @template["event"] = "advanceStage"
+    # reply = askActor(GenericMessage, 1)
+    # reply = askActor(GenericMessage, 1)
+    # reply = askActor(GenericMessage, 1)
+
+
+    # ## get base yield for comparison and in case equation changes
+    # reset_template!
+    # @template["event"] = "getFarmHistory"
+    # reply = askActor(GenericMessage, 1)
+    # startYield = reply["fields"][0][0]["yield"]
+    # startYield.should == reply["fields"][1][0]["yield"]
+
+    ## plant grass on one field, corn on the other
+    reset_template!
+    @template["crop"] = "grass"
+    askActor(PlantMessage, 0)
+
+    reset_template!
+    @template["crop"] = "corn"
+    @template["field"] = 1
+    askActor(PlantMessage, 0)
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+
+    ## then plant corn again on both to compare yields
+    reset_template!
+    @template["crop"] = "corn"
+    @template["field"] = 0
+    askActor(PlantMessage, 0)
+
+    reset_template!
+    @template["crop"] = "corn"
+    @template["field"] = 1
+    askActor(PlantMessage, 0)
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+
+    #check year 1 of farm history for yields
+    reset_template!
+    @template["event"] = "getFarmHistory"
+    reply = askActor(GenericMessage, 1)
+    # puts reply["fields"][0][1]
+    # puts reply["fields"][1][1]
+    # reply["fields"][0][1]["yield"].should > startYield
+    # reply["fields"][1][1]["yield"].should < startYield
+  end
+
+  it "yields different amounts for different soil health levels" do
+    askActor(JoinGameMessage)
+    reset_template!
+
+    ## Plant corn in both to get base yield
+
+    @template["crop"] = "corn"
+    askActor(PlantMessage, 0)
+
+    reset_template!
+    @template["crop"] = "corn"
+    @template["field"] = 1
+    askActor(PlantMessage, 0)
+
+
+    ## then plant corn in one and grass in the other for a few years to change SOC levels
+    nYears = 10
+    nYears.times do |t|
+      reset_template!
+      @template["event"] = "advanceStage"
+      askActor(GenericMessage, 1)
+      askActor(GenericMessage, 1)
+      askActor(GenericMessage, 1)
+
+      reset_template!
+      @template["crop"] = "grass"
+      @template["field"] = 0
+      askActor(PlantMessage, 0)
+
+      reset_template!
+      @template["crop"] = "corn"
+      @template["field"] = 1
+      askActor(PlantMessage, 0)
+    end
+
+
+    ## Then plant corn again to compare yields
+    reset_template!
+    @template["crop"] = "corn"
+    @template["field"] = 0
+    askActor(PlantMessage, 0)
+
+    reset_template!
+    @template["crop"] = "corn"
+    @template["field"] = 1
+    askActor(PlantMessage, 0)
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+
+    reset_template!
+    @template["event"] = "getFarmHistory"
+    reply = askActor(GenericMessage, 1)
+
+    startYield = reply["fields"][0][0]["yield"]
+    startYield.should == reply["fields"][1][0]["yield"]
+    reply["fields"][0][nYears]["yield"].should > startYield
+    reply["fields"][1][nYears]["yield"].should < startYield
 
   end
 
   it "calculates phosphorous runoff effects from planting decisions" do
+    askActor(JoinGameMessage)
+    reset_template!
+
+    ## Plant corn in both to get base yield
+
+    @template["crop"] = "corn"
+    askActor(PlantMessage, 0)
+
+    reset_template!
+    @template["crop"] = "corn"
+    @template["field"] = 1
+    askActor(PlantMessage, 0)
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+
+    reset_template!
+    @template["event"] = "getFarmInfo"
+    cornPhos = askActor(GenericMessage, 1)["phosphorous"]
+    cornPhos.should_not be nil
+
+    @template["crop"] = "grass"
+    askActor(PlantMessage, 0)
+
+    reset_template!
+    @template["crop"] = "grass"
+    @template["field"] = 1
+    askActor(PlantMessage, 0)
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+
+    reset_template!
+    @template["event"] = "getFarmInfo"
+    grassPhos = askActor(GenericMessage, 1)["phosphorous"]
+    grassPhos.should_not be nil
+
+    cornPhos.should > grassPhos
 
   end
 end

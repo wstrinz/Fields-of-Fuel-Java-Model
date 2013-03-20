@@ -38,8 +38,13 @@ module AkkaHelper
   class ServerListener < Base
     def onReceive(msg)
       if msg.is_a? ConnectMessage
-        uri = msg.uri
-        @red = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
+        if msg.uri
+          uri = msg.uri
+          @red = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
+        else
+          puts "connecting to local redis"
+          @red = Redis.new
+        end
       elsif msg.is_a? EventMessage
         if @red
           # puts "writing #{msg.message} to pipe"

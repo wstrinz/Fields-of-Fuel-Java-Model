@@ -16,6 +16,8 @@ public class Farm {
   private boolean acceptCornContract;
   private boolean acceptSwitchgrassContract;
   private boolean ready;
+  private double phosphorous;
+  private double GBI; //Grassland Bird Index
 
 
   public Farm(String name, int capital) {
@@ -117,7 +119,6 @@ public class Farm {
   }
 
   public void changeFieldManagement(int fieldnum, String technique, boolean value) {
-    // TODO Possibly add checks for if managment is on?
     Field field = fields.get(fieldnum);
     switch (technique){
     case "fertilizer":
@@ -135,7 +136,6 @@ public class Farm {
   }
 
   public void setCapital(int i) {
-    // TODO Auto-generated method stub
     capital = i;
   }
 
@@ -147,5 +147,29 @@ public class Farm {
     this.ready = ready;
   }
 
+  public double getPhosphorous() {
+    return phosphorous;
+  }
+
+  public void updatePhosphorous() {
+    double cornCount =0;
+    for(Field f:this.fields){
+      if(f.getCrop() == Crop.CORN){
+        cornCount ++;
+      }
+    }
+    double cornRatio = cornCount / this.fields.size();
+    this.phosphorous = Math.pow(10, (.79 * cornRatio) - 1.44);
+
+  }
+
+  public double getGBI() {
+    return GBI;
+  }
+
+  public void updateGBI() {
+    //this is going to take some spatial specificty, so save for later
+    //Fields are about 65 meters on each side if they are each an acre, so for now maybe
+  }
 
 }

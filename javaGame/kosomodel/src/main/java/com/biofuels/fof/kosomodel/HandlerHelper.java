@@ -143,7 +143,7 @@ public class HandlerHelper {
         thisfield.put("fertilizer", f.isFertilize());
         thisfield.put("pesticide", f.isPesticide());
         thisfield.put("tillage",f.isTill());
-        thisfield.put("SOM",f.getSOM());
+        thisfield.put("SOM",f.getSOC());
         list.add(thisfield);
       }
 
@@ -374,8 +374,10 @@ public class HandlerHelper {
 //    System.out.println(clientID);
     int earnings = games.get(roomID).getFarm(clientID).getCapital();
     int earningsRank = games.get(roomID).getCapitalRank(clientID);
+    double phos = games.get(roomID).getFarm(clientID).getPhosphorous();
     JSONObject replyGetFarmInfo = new JSONObject();
     replyGetFarmInfo.put("event", "getFarmInfo");
+    replyGetFarmInfo.put("phosphorous", phos);
     replyGetFarmInfo.put("capital", earnings);
     replyGetFarmInfo.put("capitalRank", earningsRank);
     replyGetFarmInfo.put("clientID", sendAddr);

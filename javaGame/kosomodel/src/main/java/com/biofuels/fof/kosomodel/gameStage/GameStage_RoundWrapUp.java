@@ -19,6 +19,7 @@ public class GameStage_RoundWrapUp extends GameStage {
 
     //compute new SOM for each field
     for (Farm fa:game.getFarms()){
+      fa.updatePhosphorous();
       for(Field fi:fa.getFields()){
         fi.updateSOM();
         fi.addHistoryYear();

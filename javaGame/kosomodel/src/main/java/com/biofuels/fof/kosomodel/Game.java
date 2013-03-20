@@ -218,15 +218,18 @@ public class Game {
       int profit = 0;
       for(Field fi:f.getFields()){
         if(fi.getCrop().equals(Crop.CORN)){
-          profit += 2000;
+          profit += 1000;
         }
         else if(fi.getCrop().equals(Crop.GRASS)){
           profit += 300;
         }
+        fi.setLastYield(fi.calculateYield());
       }
       f.setCapital(f.getCapital()+profit);
     }
   }
+
+
 
   public void clearFields() {
     for(Farm f:farms.values()){
