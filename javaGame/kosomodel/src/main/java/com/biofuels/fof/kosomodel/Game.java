@@ -180,6 +180,10 @@ public class Game {
     return gameYear;
   }
 
+  public void setYear(int year){
+    gameYear = year;
+  }
+
   public int getStageNumber() {
     return roundManager.getCurrentStageNumber();
   }
@@ -198,6 +202,8 @@ public class Game {
     for(Farm fa:farms.values()){
       fa.setReady(false);
     }
+    if (this.getStageNumber() == 0)
+      setYear(getYear()+1);
     resetReadyFarmers();
   }
 

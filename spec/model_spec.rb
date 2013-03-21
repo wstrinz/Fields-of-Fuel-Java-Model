@@ -270,11 +270,11 @@ describe ModelWrapper do
 
   it "sends out both confirmation and room info on a successful join" do
 
-    joinReply = askActor(JoinGameMessage, 3)
+    joinReply = askActor(JoinGameMessage, 4)
     # puts "r: #{joinReply}"
     joinReply[0]["result"].should == true
-    joinReply[2]["event"].should == "farmerList"
-    joinReply[2]["Farmers"][0]["name"].should == @template["userName"]
+    joinReply[3]["event"].should == "farmerList"
+    joinReply[3]["Farmers"][0]["name"].should == @template["userName"]
   end
 
   it "is assigned 2 fields with corn on loading" do
@@ -790,6 +790,5 @@ describe ModelWrapper do
     grassPhos.should_not be nil
 
     cornPhos.should > grassPhos
-
   end
 end
