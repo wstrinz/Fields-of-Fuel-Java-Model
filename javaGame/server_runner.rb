@@ -1,9 +1,9 @@
 scriptloc = File.expand_path(File.dirname(__FILE__))
 
-if ARGV[0]
-  puts `javac -cp "#{scriptloc}"/json-simple-1.1.1.jar "#{scriptloc}"/*.java` # attempt to compile server
-  puts `jar cf "#{scriptloc}"/FoFModel.jar "#{scriptloc}"/*.class`
-end
+# if ARGV[0]
+#   puts `javac -cp "#{scriptloc}"/json-simple-1.1.1.jar "#{scriptloc}"/*.java` # attempt to compile server
+#   puts `jar cf "#{scriptloc}"/FoFModel.jar "#{scriptloc}"/*.class`
+# end
 
 
 require_relative "server_wrapper"
@@ -24,6 +24,7 @@ require_relative "server_wrapper"
 
 s = ServerWrapper.new
 
-s.do_akka
+# s.do_akka(ARGV[0])
+s.do_akka(true)
 
-s.watch(ARGV[1])
+# s.watch(ARGV[1])

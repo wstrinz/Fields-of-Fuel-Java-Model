@@ -1,11 +1,22 @@
 package com.biofuels.fof.kosomodel.gameStage;
 
 import org.json.simple.*;
-//------------------------------------------------------------------------------
-public class GameStage_Contracts implements GameStage {
 
-	public boolean ShouldEnter() {return true; }
-	public void Enter() {}
-	public void Exit() {}
-	public void HandleClientData(JSONObject data) {}
+import com.biofuels.fof.kosomodel.Game;
+//------------------------------------------------------------------------------
+public class GameStage_Contracts extends GameStage {
+
+  public GameStage_Contracts(Game g) {
+    super(g);
+    // TODO Auto-generated constructor stub
+  }
+  public boolean ShouldEnter() {return this.game.isContracts(); }
+  public void Enter() {}
+  public void Exit() {}
+  public void HandleClientData(JSONObject data) {}
+  @Override
+  public String getName() {
+    // TODO Auto-generated method stub
+    return "Accept/Reject Contracts";
+  }
 }

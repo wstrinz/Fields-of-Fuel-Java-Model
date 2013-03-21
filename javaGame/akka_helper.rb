@@ -1,3 +1,4 @@
+require 'java'
 module AkkaHelper
   class Base < UntypedActor
     def self.create(*args)
@@ -37,13 +38,22 @@ module AkkaHelper
   class ServerListener < Base
     def onReceive(msg)
       if msg.is_a? ConnectMessage
-        uri = msg.uri
-        @red = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
+        if msg.uri
+          uri = msg.uri
+          @red = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
+        else
+          puts "connecting to local redis"
+          @red = Redis.new
+        end
       elsif msg.is_a? EventMessage
         if @red
-          @red.lpush("fromJava",msg.message)
+          # puts "writing #{msg.message} to pipe"
+          # @red.lpush("fromJava",msg.message)
+            @red.publish(:toRuby,msg.message)
         else
-          puts "Redis sever not specified"
+          puts "Redis sever not specified, trying to reconnect"
+          @uri = URI.parse("redis://redistogo:1f736fa2a27319dc45b7ebb470e04bbe@dory.redistogo.com:10177/")
+          @red = Redis.new(:host => @uri.host, :port => @uri.port, :password => @uri.password)
         end
       else
       end

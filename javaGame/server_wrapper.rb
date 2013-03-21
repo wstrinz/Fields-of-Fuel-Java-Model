@@ -34,8 +34,12 @@ class ServerWrapper
       puts @wpipe = open(File.join(scriptloc, "../pipes/javapipe"),'w+')
     else
       puts 'connecting to redis server'
-      @uri = URI.parse("redis://redistogo:1f736fa2a27319dc45b7ebb470e04bbe@dory.redistogo.com:10177/")
-      @red = Redis.new(:host => @uri.host, :port => @uri.port, :password => @uri.password)
+      if(@development == true)
+        @red = Redis.new ## DEVELOPMENT
+      else
+        @uri = URI.parse("redis://redistogo:1f736fa2a27319dc45b7ebb470e04bbe@dory.redistogo.com:10177/")
+        @red = Redis.new(:host => @uri.host, :port => @uri.port, :password => @uri.password)
+      end
     end
     # puts "connected to redis #{@red}"
     # @event_handler = EventHandler.new
@@ -87,6 +91,10 @@ class ServerWrapper
     @red.lpush("fromJava",msg)
   end
 
+  def publish(msg)
+    @red.publish('rubyonrails',msg)
+  end
+
   def read_queue
     ret = nil
     until ret
@@ -95,7 +103,8 @@ class ServerWrapper
       rescue
         puts "couldn't connect to redis, retrying"
         #uri = URI.parse("redis://redistogo:1f736fa2a27319dc45b7ebb470e04bbe@dory.redistogo.com:10177/")
-        @red = Redis.new(:host => @uri.host, :port => @uri.port, :password => @uri.password)
+        # @red = Redis.new(:host => @uri.host, :port => @uri.port, :password => @uri.password)
+        @red = Redis.new
       end
       # unless ret
       #   puts "timeout, retrying"
@@ -110,15 +119,19 @@ class ServerWrapper
     end
   end
 
-  def do_akka
+  def do_akka(development)
+    @development = development
     jside = ActorSystemHelper.new
     @system = ActorSystem.create("Biofuels")
     # pro = Props.new(HandlerActor)
     @handler = jside.makenew(@system, Handler, "handler")  # = system.actorOf(pro, "counter")
     @listener = @system.actorOf(Props.new(ServerListener), "listener")
-    @listener.tell(ConnectMessage.new(URI.parse("redis://redistogo:1f736fa2a27319dc45b7ebb470e04bbe@dory.redistogo.com:10177/")))
+    if(development==true)
+      @listener.tell(ConnectMessage.new(nil))
+    else
+      @listener.tell(ConnectMessage.new(URI.parse("redis://redistogo:1f736fa2a27319dc45b7ebb470e04bbe@dory.redistogo.com:10177/")))
+    end
     @handler.tell(@listener)
     watch('redis')
   end
-
 end

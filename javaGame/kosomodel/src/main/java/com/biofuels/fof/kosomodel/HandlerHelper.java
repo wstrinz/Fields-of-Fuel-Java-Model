@@ -2,6 +2,7 @@ package com.biofuels.fof.kosomodel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.simple.JSONArray;
@@ -12,20 +13,23 @@ import akka.actor.ActorRef;
 
 public class HandlerHelper {
 
-  public static Map<String, Game> games = new HashMap<>();
+  public Map<String, Game> games = new HashMap<>();
   private ActorRef listener;
+  private ActorRef handler;
 
   public HandlerHelper() {
     // TODO Auto-generated constructor stub
   }
 
-  public HandlerHelper(ActorRef listener) {
+  public HandlerHelper(ActorRef listener, ActorRef handler) {
     // TODO Auto-generated constructor stub
     this.listener = listener;
+    this.handler = handler;
   }
 
-  @SuppressWarnings({ "unchecked", "deprecation" }) //not sure why a one-way send is deprecated...
+  @SuppressWarnings("unchecked")
   public String[] handle(String event){
+//    System.out.println("Handling " + event);
     ArrayList<String> replies = new ArrayList<>();
 
     JSONObject eventObj = (JSONObject) JSONValue.parse(event);
@@ -36,67 +40,92 @@ public class HandlerHelper {
       clientID = Integer.parseInt((String) eventObj.get("clientID"));
     }
     String roomName = (String) eventObj.get("roomName");
+    String roomID = (String) eventObj.get("roomID");
     String farmerName = (String) eventObj.get("userName");
+    String deviseName = (String) eventObj.get("deviseName");
 
     switch (eventObj.get("event").toString()){
 
     case "validateRoom":
       if(games.get(roomName) != null){
-        listener.tell(new EventMessage(buildJson(clientID, "validateRoom", "result", false)));
-        //        replies.add("{\"event\":\"validateRoom\",\"result\":false}");
+        sendMessage(buildJson(clientID.toString(), "validateRoom", "result", false));
       }
       else{
-        //            System.out.println("j tell success " + event + " to " + listener);
-        listener.tell(new EventMessage(buildJson(clientID, "validateRoom", "result", true)));
-        //        replies.add("{\"event\":\"validateRoom\",\"result\":true}");
+        // System.out.println("j tell success " + event + " to " + listener);
+        sendMessage(buildJson(clientID.toString(), "validateRoom", "result", true));
       }
+      break;
+
+    case "globalValidateRoom":
+      boolean roomResult = false;
+      boolean needsPass = false;
+      boolean correctPass = false;
+      if(games.get(roomName) != null){
+        roomResult = true;
+        if(games.get(roomName).hasPassword()){
+          needsPass = true;
+          if(games.get(roomName).getPassword().equals(eventObj.get("password")))
+            correctPass = true;
+        }
+      }
+
+      sendMessage(buildJson(clientID.toString(), "globalValidateRoom","roomResult",roomResult,"needsPassword",needsPass,
+          "passwordResult",correctPass));
+      break;
+
+    case "globalJoinRoom":
+      boolean joinResult = false;
+      if(games.get(roomName) != null){
+        if(games.get(roomName).hasPassword()){
+          if(games.get(roomName).getPassword().equals(eventObj.get("password")))
+            joinResult = true;
+        }
+        else
+          joinResult = true;
+      }
+      sendMessage(buildJson(clientID.toString(), "globalJoinRoom","result",joinResult));
       break;
 
     case "changeSettings":
       //replies.add(event);
+      games.get(roomID).changeSettings(((Long)eventObj.get("fieldCount")).intValue(),
+          (boolean) eventObj.get("contractsOn"), (boolean)eventObj.get("mgmtOptsOn"));
       break;
 
     case "createRoom":
-      //uncomment to test concurrency
-      /*System.out.print("sleeping\n");
-            try {
-              Thread.sleep(10000);
-            } catch (InterruptedException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
-            }
-            System.out.print("waking\n");*/;
+
             if(games.get(roomName) != null){
-              sendMessage(buildJson(clientID, "createRoom", "result", false));
-              sendMessage(buildJson(clientID, "createRoom", "result", false));
-              //        replies.add("{\"event\":\"createRoom\",\"result\":false}");
+              sendMessage(buildJson(clientID.toString(), "createRoom", "result", false));
+
             }
             else if(((String)eventObj.get("password")).length()>0){
-              //        String pass = (String)eventObj.get("password");
-              //        long players = (long)eventObj.get("playerCount");
-              //            System.out.println("pass " + pass + " players " + (long)eventObj.get("playerCount"));
               games.put(roomName, new Game(roomName, (String)eventObj.get("password"), (long)eventObj.get("playerCount")));
+              sendMessage(buildJson(clientID.toString(), "createRoom","result",true));
             }
             else{
               games.put(roomName, new Game(roomName, (long)eventObj.get("playerCount")));
+              sendMessage(buildJson(clientID.toString(), "createRoom","result",true));
             }
-            sendMessage(buildJson(clientID, "createRoom","result",true));
+
             //replies.add("{\"event\":\"createRoom\",\"result\":true}");
             break;
 
     case "validateUserName":
-      boolean roomResult = (roomExists(roomName) && !games.get(roomName).isFull());
+       roomResult = (roomExists(roomName) && !games.get(roomName).isFull());
       boolean nameResult = false;
-      boolean needsPass = false;
-      boolean correctPass = false;
-      if(roomResult){
-        nameResult = !eventObj.get("userName").equals("") && !farmerExistsInRoom(farmerName, roomName);//!games.get(roomName).hasFarmer((String) eventObj.get(eventObj.get("userName")));
+       needsPass = false;
+       correctPass = false;
+       if(roomResult){
+//        System.out.println("user " + eventObj.get("userName"));
+        nameResult = !eventObj.get("userName").equals("");
+        nameResult = nameResult && ((!farmerExistsInRoom(farmerName, roomName)
+                || (deviseName != null && games.get(roomName).getFarm(farmerName).getCurrentUser().equals(deviseName))));
         needsPass = games.get(roomName).hasPassword();
         if(needsPass){
           correctPass = games.get(roomName).getPassword().equals(eventObj.get("password"));
         }
       }
-      sendMessage(buildJson(clientID, "validateUserName","roomResult",roomResult,"needsPassword",needsPass,
+      sendMessage(buildJson(clientID.toString(), "validateUserName","roomResult",roomResult,"needsPassword",needsPass,
           "passwordResult",correctPass,"userNameResult",nameResult));
       break;
 
@@ -105,26 +134,128 @@ public class HandlerHelper {
 
       JSONArray list = new JSONArray();
       JSONObject msg = new JSONObject();
-      JSONObject fields = new JSONObject();
+      //JSONObject fields = new JSONObject();
       msg.put("event", "loadFromServer");
       msg.put("clientID", clientID);
-      list.addAll(games.get(roomName).getFieldsFor(clientID));
-      fields.put("fields", JSONValue.toJSONString(list));
-      msg.putAll(fields);
-      System.out.println(msg.toJSONString());
+      for(Field f:games.get(roomName).getFields(clientID)){
+        JSONObject thisfield = new JSONObject();
+        thisfield.put("crop",f.getCrop().toString());
+        thisfield.put("fertilizer", f.isFertilize());
+        thisfield.put("pesticide", f.isPesticide());
+        thisfield.put("tillage",f.isTill());
+        thisfield.put("SOM",f.getSOC());
+        list.add(thisfield);
+      }
+
+      msg.put("fields", list);
       sendMessage(msg.toJSONString());
 
       break;
 
+    case "getFarmerList":
+      list = new JSONArray();
+      //JSONObject farmers = new JSONObject();
+      msg = new JSONObject();
+      for(Farm f:games.get(roomID).getFarms()){
+        JSONObject farm = new JSONObject();
+        farm.put("name", f.getName());
+        farm.put("ready", f.isReady());
+//        list.add("\""+f.getName()+"\"");
+//        list.add(false);
+        list.add(farm);
+      }
+      msg.put("event", "farmerList");
+      msg.put("clientID", clientID);
+      msg.put("Farmers", list);
+//      System.out.println(msg.toJSONString());
+      sendMessage(msg.toJSONString());
+    break;
+
+    case "plantField":
+      //System.out.println("planting");
+      games.get(roomID).getFarm(clientID).setField(((Long)eventObj.get("field")).intValue(),(String) eventObj.get("crop"));
+    break;
+
+    case "setFieldManagement":
+      int field = ((Long)eventObj.get("field")).intValue();
+      String technique = (String) eventObj.get("technique");
+      boolean value = (boolean) eventObj.get("value");
+      games.get(roomID).getFarm(clientID).changeFieldManagement(field, technique, value);
+    break;
+
+    case "getGameInfo":
+      sendGetGameInfo(roomID, clientID);
+    break;
+
+    case "advanceStage":
+      doAdvanceStage(roomID);
+    break;
+
+    case "farmerReady":
+      Game g = games.get(roomID);
+      g.getFarm(clientID).setReady(true);
+      g.farmerReady();
+      if(g.getReadyFarmers() == g.getFarms().size())
+        doAdvanceStage(roomID);
+      break;
+
+    case "getFarmInfo":
+      sendGetFarmInfo(clientID, roomID, clientID);
+//      int earnings = games.get(roomID).getFarm(clientID).getCapital();
+//      int earningsRank = games.get(roomID).getCapitalRank(clientID);
+//      JSONObject replyGetFarmInfo = new JSONObject();
+//      replyGetFarmInfo.put("event", "getFarmInfo");
+//      replyGetFarmInfo.put("capital", earnings);
+//      replyGetFarmInfo.put("capitalRank", earningsRank);
+//      sendMessage(replyGetFarmInfo.toJSONString());
+      break;
+
+    case "getFarmHistory":
+      sendGetFarmHistory(clientID, roomID, clientID);
+      break;
+
+    case "getCurrentSettings":
+      sendCurrentSettings(clientID, roomID, clientID);
+      break;
+
     case "joinRoom":
-      if(roomExists(roomName) && (!farmerExistsInRoom(farmerName, roomName) && !games.get(roomName).isFull())
-          && games.get(roomName).getPassword().equals(eventObj.get("password")))
+      boolean roomExist = roomExists(roomName);
+      boolean shouldMakeNew = false;
+      boolean shouldRejoin = false;
+      if(roomExist){
+        shouldMakeNew = !farmerExistsInRoom(farmerName, roomName) && !games.get(roomName).isFull();
+        if(!shouldMakeNew){
+          shouldRejoin = deviseName != null && games.get(roomName).getFarm(farmerName).getCurrentUser().equals(deviseName);
+        }
+      }
+      if(roomExist && (shouldMakeNew || shouldRejoin) && games.get(roomName).getPassword().equals(eventObj.get("password")))
       {
-        games.get(roomName).addFarmer(farmerName, clientID);
-        sendMessage(buildJson(clientID, "joinRoom","result",true,"roomName",roomName,"userName",(String)eventObj.get("userName")));
+        if(shouldMakeNew){
+          games.get(roomName).addFarmer(farmerName, clientID);
+          games.get(roomName).getFarm(farmerName).setCurrentUser(deviseName);
+        }
+        else if(shouldRejoin){
+          games.get(roomName).rejoinFarmer(farmerName, clientID);
+        }
+        sendMessage(buildJson(clientID.toString(), "joinRoom","result",true,"roomName",roomName,"userName",(String)eventObj.get("userName")));
+        sendCurrentSettings(clientID, roomID, clientID);
+
+
+        list = new JSONArray();
+        msg = new JSONObject();
+        for(Farm f:games.get(roomName).getFarms()){
+          JSONObject farm = new JSONObject();
+          farm.put("name", f.getName());
+          farm.put("ready", true);
+          list.add(farm);
+        }
+        msg.put("event", "farmerList");
+        msg.put("clientID", roomName);
+        msg.put("Farmers", list);
+        sendMessage(msg.toJSONString());
       }
       else
-        sendMessage(buildJson(clientID, "joinRoom","result",false));
+        sendMessage(buildJson(clientID.toString(), "joinRoom","result",false));
       break;
     default:
     }
@@ -137,9 +268,59 @@ public class HandlerHelper {
       return (room.length()>0 && roomExists(room));
     }*/
 
-  private void sendMessage(String message) {
+
+
+  @SuppressWarnings("unchecked")
+  private void doAdvanceStage(String roomID) {
     // TODO Auto-generated method stub
-    listener.tell(new EventMessage(message));
+//    System.out.println("advancing");
+    games.get(roomID).advanceStage();
+
+    int stage = games.get(roomID).getStageNumber();
+    String roundName = games.get(roomID).getStageName();
+    int year = games.get(roomID).getYear();
+
+    JSONObject replyAdvanceStage = new JSONObject();
+    replyAdvanceStage.put("event", "advanceStage");
+    replyAdvanceStage.put("stageNumber", stage);
+    replyAdvanceStage.put("stageName", roundName);
+    replyAdvanceStage.put("year", year);
+    replyAdvanceStage.put("clientID", roomID);
+    sendMessage(replyAdvanceStage.toJSONString());
+
+
+
+    if (stage == 0){
+      for(Farm fa:games.get(roomID).getFarms()){
+        JSONArray list = new JSONArray();
+        JSONObject msg = new JSONObject();
+        //JSONObject fields = new JSONObject();
+        msg.put("event", "loadFromServer");
+        msg.put("clientID", fa.getClientID());
+
+        for(Field f:fa.getFields()){
+          JSONObject thisfield = new JSONObject();
+          thisfield.put("crop",f.getCrop().toString());
+          thisfield.put("fertilizer", f.isFertilize());
+          thisfield.put("pesticide", f.isPesticide());
+          thisfield.put("tillage",f.isTill());
+          list.add(thisfield);
+        }
+
+        msg.put("fields", list);
+        sendGetFarmInfo(fa.getClientID(), roomID, fa.getClientID());
+
+        sendMessage(msg.toJSONString());
+
+      }
+      sendGetGameInfo(roomID, roomID);
+    }
+  }
+
+  private void sendMessage(String message) {
+    EventMessage msg = new EventMessage(message);
+//    System.out.println("sending " + msg.message);
+    listener.tell(msg, handler);
   }
 
   private boolean roomExists(String room){
@@ -152,7 +333,8 @@ public class HandlerHelper {
     }
     return false;
   }
-  private String buildJson(int clientID, String event, Object ... arguments){
+
+  private String buildJson(String clientID, String event, Object ... arguments){
     String start = "{\"event\":\""+event+"\",\"clientID\":\"" + clientID + "\",";
     StringBuilder sb = new StringBuilder(start);
     if(!(arguments.length % 2 == 0)){
@@ -189,12 +371,90 @@ public class HandlerHelper {
     this.listener = actor;
   }
 
-  //for testing
-  /*    public static void main(String[] args) {
+  @SuppressWarnings("unchecked")
+  public void sendGetFarmInfo(int clientID, String roomID,  Object sendAddr){
+//    if(roomID == null)
+//      System.out.println("null room id");
+//    else
+//      System.out.println(roomID);
+//
+//    System.out.println(clientID);
+    int earnings = games.get(roomID).getFarm(clientID).getCapital();
+    int earningsRank = games.get(roomID).getCapitalRank(clientID);
+    double phos = games.get(roomID).getFarm(clientID).getPhosphorous();
+    JSONObject replyGetFarmInfo = new JSONObject();
+    replyGetFarmInfo.put("event", "getFarmInfo");
+    replyGetFarmInfo.put("phosphorous", phos);
+    replyGetFarmInfo.put("capital", earnings);
+    replyGetFarmInfo.put("capitalRank", earningsRank);
+    replyGetFarmInfo.put("clientID", sendAddr);
+    sendMessage(replyGetFarmInfo.toJSONString());
+  }
 
-      String teststr = new String("{\"event\":\"createRoom\",\"roomName\":\"room\"}");
-      EventHandler meself = new EventHandler();
-      meself.handle(teststr);
+  @SuppressWarnings("unchecked")
+  public void sendGetGameInfo(String roomID, Object sendAddr){
+    int year = games.get(roomID).getYear();
+    int stage = games.get(roomID).getStageNumber();
+    List<String> enabledStages = games.get(roomID).getEnabledStages();
+    JSONArray stages = new JSONArray();
+    stages.addAll(enabledStages);
+//    System.out.println(enabledStages.toString());
+    JSONObject replyGameInfo = new JSONObject();
+    replyGameInfo.put("event", "getGameInfo");
+    replyGameInfo.put("year", year);
+    replyGameInfo.put("stage", stage);
+    replyGameInfo.put("enabledStages", stages);
+    replyGameInfo.put("clientID", sendAddr);
+    sendMessage(replyGameInfo.toJSONString());
+  }
 
-    }*/
+  @SuppressWarnings("unchecked")
+  private void sendGetFarmHistory(Integer clientID, String roomID, Object sendAddr) {
+//    List<Field> fields = games.get(roomID).getFarm(clientID).getFields();
+    JSONObject reply = new JSONObject();
+    JSONArray fields = new JSONArray();
+    for(Field f:games.get(roomID).getFarm(clientID).getFields()){
+      JSONArray seasons = new JSONArray();
+      FieldHistory history = f.getHistory();
+      if(history == null){
+        System.out.println("history null!");
+      }
+      for(FieldHistory.HistoryYear y:history.getHistory()){
+        JSONObject year = new JSONObject();
+        year.put("SOM", y.SOM);
+        year.put("crop", y.crop.toString());
+        year.put("yield", y.yield);
+        year.put("fertilizer", y.fertilizer);
+        year.put("pesticide", y.pesticide);
+        year.put("till", y.till);
+        seasons.add(year);
+      }
+      fields.add(seasons);
+    }
+    reply.put("event", "getFarmHistory");
+    reply.put("clientID", sendAddr);
+    reply.put("fields", fields);
+    sendMessage(reply.toJSONString());
+  }
+
+  @SuppressWarnings("unchecked")
+  private void sendCurrentSettings(Integer clientID, String roomID, Object sendAddr){
+    JSONObject reply = new JSONObject();
+    reply.put("event", "changeSettings");
+    reply.put("contractsOn", games.get(roomID).isContracts());
+    reply.put("mgmtOptsOn", games.get(roomID).isManagement());
+    reply.put("fields", games.get(roomID).getFieldsPerFarm());
+    reply.put("clientID", sendAddr);
+    sendMessage(reply.toJSONString());
+
+    int stage = games.get(roomID).getStageNumber();
+    String roundName = games.get(roomID).getStageName();
+    JSONObject replyAdvanceStage = new JSONObject();
+    replyAdvanceStage.put("event", "advanceStage");
+    replyAdvanceStage.put("stageNumber", stage);
+    replyAdvanceStage.put("stageName", roundName);
+    replyAdvanceStage.put("clientID", sendAddr);
+    sendMessage(replyAdvanceStage.toJSONString());
+
+  }
 }

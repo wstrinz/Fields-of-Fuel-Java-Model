@@ -9,20 +9,16 @@ import org.json.simple.*;
 
 public class Handler extends UntypedActor{
 
-  HandlerHelper eh = new HandlerHelper(getContext().actorFor("/user/listener"));
+  HandlerHelper eh = new HandlerHelper(getContext().actorFor("/user/listener"), getSelf());
 
   public void onReceive(Object message) throws Exception {
 
     if(message instanceof EventMessage){
-      String[] replies = eh.handle(((EventMessage)message).message);
-
-      for(String m:replies){
-        // System.out.println("reply " + m + " to " + getContext().actorFor("../listener"));
-        getContext().actorFor("../listener").tell(new EventMessage(m), getSelf());
-      }
+      eh.handle(((EventMessage)message).message);
     }
 
-    if(message instanceof ActorRef){
+
+    else if(message instanceof ActorRef){
       eh.setListener((ActorRef) message);
     }
   }

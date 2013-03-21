@@ -1,6 +1,9 @@
 package com.biofuels.fof.kosomodel;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.biofuels.fof.kosomodel.gameStage.GameStage;
 
 
 
@@ -9,14 +12,17 @@ public class Game {
 
   private final String roomName;
   private final boolean hasPassword;
-  private boolean contracts;
-  private boolean management;
+  private boolean contracts=false;
+  private boolean management=false;
   private final String password;
   private ConcurrentHashMap<Integer, Farm> farms;  //used because doesn't allow annoying null mappings
   private long maxPlayers;
   private RoundManager roundManager;
+  private int readyFarmers;
+  private int gameYear=0;
+  private int fieldsPerFarm=2;
 
-/*  private class RoundManager{
+  /*  private class RoundManager{
 
 
     public RoundManager(boolean contracts, boolean management){
@@ -34,7 +40,7 @@ public class Game {
     roundManager = new RoundManager();
     roundManager.Init(this);
     this.maxPlayers = maxPlayers;
-    // TODO Auto-generated constructor stub
+    roundManager.AdvanceStage();
   }
 
   public Game(String name, String pass, long maxPlayers) {
@@ -45,7 +51,7 @@ public class Game {
     this.maxPlayers = maxPlayers;
     roundManager = new RoundManager();
     roundManager.Init(this);
-    // TODO Auto-generated constructor stub
+    roundManager.AdvanceStage();
   }
 
   public String getRoomName() {
@@ -53,7 +59,7 @@ public class Game {
   }
 
   public boolean hasFarmer(String name) {
-    // TODO Auto-generated method stub
+
     for(Farm f:farms.values()){
       if (f.getName().equals(name))
         return true;
@@ -62,11 +68,10 @@ public class Game {
   }
 
   public void addFarmer(String newPlayer, int clientID) {
-    // TODO Auto-generated method stub
     Farm f = new Farm(newPlayer, 1000);
     f.setClientID(clientID);
-    f.getFields()[0] = new Field();
-    f.getFields()[1] = new Field();
+    f.getFields().add(new Field());
+    f.getFields().add(new Field());
     farms.put(clientID, f);
 
   }
@@ -104,16 +109,158 @@ public class Game {
   }
 
   public void setField(int clientID, int field, Crop crop){
-    farms.get(clientID).getFields()[field].setCrop(crop);
+    farms.get(clientID).getFields().get(field).setCrop(crop);
   }
 
-  public ArrayList<Crop> getFieldsFor(Integer clientID) {
-    // TODO Auto-generated method stub
-    ArrayList<Crop> cropList = new ArrayList<>();
+  public ArrayList<String> getFieldsFor(Integer clientID) {
+    ArrayList<String> cropList = new ArrayList<>();
     for(Field f:farms.get(clientID).getFields()){
-      cropList.add(f.getCrop());
+      cropList.add(f.getCrop().toString());
     }
     return cropList;
+  }
+
+  public ArrayList<Farm> getFarms() {
+
+    return new ArrayList<>(farms.values());
+  }
+
+  public Farm getFarm(String name) {
+    for(Farm f:farms.values()){
+      if (f.getName().equals(name))
+        return f;
+    }
+    return null;
+  }
+
+  public void rejoinFarmer(String farmerName, Integer clientID) {
+
+    Farm farm = getFarm(farmerName);
+    farms.remove(getFarm(farmerName).getClientID());
+    farm.setClientID(clientID);
+    farms.put(clientID, farm);
+  }
+
+  public Farm getFarm(Integer clientID) {
+
+    return farms.get(clientID);
+  }
+
+  public void changeSettings(int fields, boolean contracts, boolean management) {
+    int currFields = fieldsPerFarm;
+    fieldsPerFarm = fields;
+    if(farms.size()>0){
+      currFields = ((Farm)farms.values().toArray()[0]).getFields().size();
+    }
+    for(Farm fa:farms.values()){
+      fa.setReady(false);
+    }
+    resetReadyFarmers();
+
+    if(fields < currFields){
+      System.out.println("destroying fields not implemented yet");
+    }
+    else if(fields > currFields){
+      for(Farm f:farms.values()){
+        for(int i = 0;i<fields - currFields;i++){
+          f.getFields().add(new Field());
+        }
+      }
+    }
+    this.contracts = contracts;
+    this.management = management;
+    roundManager.resetStages();
+  }
+
+  public List<Field> getFields(Integer clientID) {
+    return farms.get(clientID).getFields();
+  }
+
+  public int getYear() {
+    return gameYear;
+  }
+
+  public void setYear(int year){
+    gameYear = year;
+  }
+
+  public int getStageNumber() {
+    return roundManager.getCurrentStageNumber();
+  }
+
+  public List<String> getEnabledStages() {
+    ArrayList<String> ret = new ArrayList<String>();
+    List<GameStage> stages = roundManager.getEnabledStages();
+    for (GameStage s:stages){
+      ret.add(s.getName());
+    }
+    return ret;
+  }
+
+  public void advanceStage() {
+    roundManager.AdvanceStage();
+    for(Farm fa:farms.values()){
+      fa.setReady(false);
+    }
+    if (this.getStageNumber() == 0)
+      setYear(getYear()+1);
+    resetReadyFarmers();
+  }
+
+  public boolean isFinalRound() {
+    return false;
+  }
+
+  public String getStageName() {
+    return roundManager.getCurrentStageName();
+  }
+
+  public int getCapitalRank(Integer clientID) {
+    return -1;
+  }
+
+  public void sellFarmerCrops() {
+    for(Farm f:farms.values()){
+      int profit = 0;
+      for(Field fi:f.getFields()){
+        if(fi.getCrop().equals(Crop.CORN)){
+          profit += 1000;
+        }
+        else if(fi.getCrop().equals(Crop.GRASS)){
+          profit += 300;
+        }
+        fi.setLastYield(fi.calculateYield());
+      }
+      f.setCapital(f.getCapital()+profit);
+    }
+  }
+
+
+
+  public void clearFields() {
+    for(Farm f:farms.values()){
+      for(Field fi:f.getFields()){
+        if(fi.getCrop().equals(Crop.CORN))
+          fi.setCrop(Crop.FALLOW);
+      }
+    }
+  }
+
+  public void farmerReady() {
+    // TODO Auto-generated method stub
+    readyFarmers++;
+  }
+
+  public int getReadyFarmers() {
+    return readyFarmers;
+  }
+
+  public void resetReadyFarmers() {
+    this.readyFarmers = 0;
+  }
+
+  public int getFieldsPerFarm() {
+    return fieldsPerFarm;
   }
 
 

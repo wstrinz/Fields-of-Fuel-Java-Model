@@ -2,11 +2,22 @@ package com.biofuels.fof.kosomodel.gameStage;
 
 import org.json.simple.*;
 
-//------------------------------------------------------------------------------
-public class GameStage_Grow implements GameStage {
+import com.biofuels.fof.kosomodel.Game;
 
-	public boolean ShouldEnter() {return true; }
-	public void Enter() {}
-	public void Exit() {}
-	public void HandleClientData(JSONObject data) {}
+//------------------------------------------------------------------------------
+public class GameStage_Grow extends GameStage {
+
+  public GameStage_Grow(Game g) {
+    super(g);
+    // TODO Auto-generated constructor stub
+  }
+  public boolean ShouldEnter() {return true; }
+  public void Enter() {}
+  public void Exit() {}
+  public void HandleClientData(JSONObject data) {}
+  @Override
+  public String getName() {
+    // TODO Auto-generated method stub
+    return "Grow";
+  }
 }
