@@ -159,7 +159,7 @@ public class HandlerHelper {
       for(Farm f:games.get(roomID).getFarms()){
         JSONObject farm = new JSONObject();
         farm.put("name", f.getName());
-        farm.put("ready", true);
+        farm.put("ready", f.isReady());
 //        list.add("\""+f.getName()+"\"");
 //        list.add(false);
         list.add(farm);
@@ -212,6 +212,10 @@ public class HandlerHelper {
 
     case "getFarmHistory":
       sendGetFarmHistory(clientID, roomID, clientID);
+      break;
+
+    case "getCurrentSettings":
+      sendCurrentSettings(clientID, roomID, clientID);
       break;
 
     case "joinRoom":
