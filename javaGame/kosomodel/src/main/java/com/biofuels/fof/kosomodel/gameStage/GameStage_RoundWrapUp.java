@@ -27,6 +27,11 @@ public class GameStage_RoundWrapUp extends GameStage {
     }
 
     game.sellFarmerCrops();
+
+    for (Farm fa:game.getFarms()){
+      fa.recomputeScores();
+    }
+
     game.clearFields();
 
     game.rerankFarms();

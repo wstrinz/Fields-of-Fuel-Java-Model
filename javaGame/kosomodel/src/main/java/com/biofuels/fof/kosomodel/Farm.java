@@ -15,17 +15,21 @@ public class Farm {
   private int envRank;
   private int energyRank;
   private int econRank;
+  private double overallScore;
+  private int overallRank;
   private String currentUser;
   private boolean acceptCornContract;
   private boolean acceptSwitchgrassContract;
   private boolean ready;
   private double phosphorous;
   private double GBI; //Grassland Bird Index
+  private Game game;
 
 
-  public Farm(String name, int capital) {
+  public Farm(String name, int capital, Game g) {
     this.name = name;
     this.capital = capital;
+    this.game = g;
     fields = new LinkedList<Field>();
     //    fields[0].setCrop(Crop.GRASS);
     // TODO Auto-generated constructor stub
@@ -74,7 +78,7 @@ public class Farm {
   }
 
   public int calcEconScore() {
-    return this.capital;
+    return this.capital / game.getLargestEarnings();
   }
 
   public String getName() {
@@ -205,6 +209,22 @@ public class Farm {
 
   public void setEconRank(int econRank) {
     this.econRank = econRank;
+  }
+
+  public double getOverallScore() {
+    return overallScore;
+  }
+
+  public void setOverallScore(double d) {
+    this.overallScore = d;
+  }
+
+  public int getOverallRank() {
+    return overallRank;
+  }
+
+  public void setOverallRank(int overallRank) {
+    this.overallRank = overallRank;
   }
 
 }

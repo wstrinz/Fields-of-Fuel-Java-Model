@@ -69,7 +69,7 @@ public class Game {
   }
 
   public void addFarmer(String newPlayer, int clientID) {
-    Farm f = new Farm(newPlayer, 1000);
+    Farm f = new Farm(newPlayer, 1000, this);
     f.setClientID(clientID);
     f.getFields().add(new Field());
     f.getFields().add(new Field());
@@ -151,19 +151,30 @@ public class Game {
     ArrayList<Double> econScores = new ArrayList<>();
     ArrayList<Double> envScores = new ArrayList<>();
     ArrayList<Double> energyScores = new ArrayList<>();
+    ArrayList<Double> sustainabilityScores = new ArrayList<>();
     for(Farm f:farms.values()){
-      econScores.add((double)f.calcEconScore());
-      envScores.add(f.calcEnvScore());
-      energyScores.add(f.calcEnergyScore());
+      econScores.add((double)f.getEconScore());
+      envScores.add(f.getEnvScore());
+      energyScores.add(f.getEnergyScore());
     }
     Collections.sort(econScores);
     Collections.sort(envScores);
     Collections.sort(energyScores);
+
     //FIXME Should not be running calculations twice, esp given concurrency issues
     for(Farm f:farms.values()){
-      f.setEconRank(econScores.indexOf((double)f.calcEconScore()));
-      f.setEnvRank(envScores.indexOf(f.calcEnvScore()));
-      f.setEnergyRank(energyScores.indexOf(f.calcEnergyScore()));
+      f.setEconRank(econScores.indexOf((double)f.getEconScore()) + 1);
+      f.setEnvRank(envScores.indexOf(f.getEnvScore()) + 1);
+      f.setEnergyRank(energyScores.indexOf(f.getEnergyScore()) + 1);
+      //System.out.println("ene: " + f.getEnergyScore() + "env: " + f.getEnvScore() + "econ: " + f.getEconScore());
+      f.setOverallScore((f.getEnergyScore() + f.getEnvScore() + f.getEconScore()) / 3);
+      sustainabilityScores.add(f.getOverallScore());
+    }
+
+    Collections.sort(sustainabilityScores);
+
+    for(Farm f:farms.values()){
+      f.setOverallRank(sustainabilityScores.indexOf(f.getOverallScore()) + 1);
     }
   }
 
@@ -269,7 +280,6 @@ public class Game {
   }
 
   public void farmerReady() {
-    // TODO Auto-generated method stub
     readyFarmers++;
   }
 
@@ -283,6 +293,17 @@ public class Game {
 
   public int getFieldsPerFarm() {
     return fieldsPerFarm;
+  }
+
+  public int getLargestEarnings() {
+    // FIXME probably a better method. go away im sleepy
+    int max = -1;
+    for(Farm f:farms.values()){
+      if(f.getCapital() > max){
+        max = f.getCapital();
+      }
+    }
+    return max;
   }
 
 

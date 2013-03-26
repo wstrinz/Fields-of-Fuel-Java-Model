@@ -805,12 +805,15 @@ describe ModelWrapper do
     @template["event"] = "getFarmInfo"
     reply = askActor(GenericMessage, 1)
     reply["sustainabilityScore"].should >= 0
+    reply["sustainabilityScore"].should <= 10
     reply["sustainabilityRank"].should > 0
-    reply["economicsScore"].should >= 0
+    reply["economicsScore"].should > 0
     reply["economicsRank"].should > 0
-    reply["energyScore"].should >= 0
+    reply["energyScore"].should > 0
+    reply["energyScore"].should <= 10
     reply["energyRank"].should > 0
-    reply["environmentScore"].should >= 0
+    # reply["environmentScore"].should >= 0
+    reply["environmentScore"].should <= 10
     reply["environmentRank"].should > 0
   end
 end
