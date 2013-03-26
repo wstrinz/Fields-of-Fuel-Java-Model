@@ -379,15 +379,35 @@ public class HandlerHelper {
 //      System.out.println(roomID);
 //
 //    System.out.println(clientID);
-    int earnings = games.get(roomID).getFarm(clientID).getCapital();
-    int earningsRank = games.get(roomID).getCapitalRank(clientID);
+    Game game = games.get(roomID);
+    int earnings = game.getFarm(clientID).getCapital();
+    int earningsRank = game.getCapitalRank(game.getFarm(clientID));
+
+
+    double economicsScore = 0;
+    int economicsRank = 1;
+    double energyScore = 0;
+    int energyRank = 1;
+    double environmentScore = 0;
+    int environmentRank = 1;
+    double sustainabilityScore = 0;
+    int sustainabilityRank = 1;
+
     double phos = games.get(roomID).getFarm(clientID).getPhosphorous();
+
     JSONObject replyGetFarmInfo = new JSONObject();
     replyGetFarmInfo.put("event", "getFarmInfo");
     replyGetFarmInfo.put("phosphorous", phos);
     replyGetFarmInfo.put("capital", earnings);
     replyGetFarmInfo.put("capitalRank", earningsRank);
-    replyGetFarmInfo.put("clientID", sendAddr);
+    replyGetFarmInfo.put("sustainabilityScore", sustainabilityScore);
+    replyGetFarmInfo.put("sustainabilityRank", sustainabilityRank);
+    replyGetFarmInfo.put("economicsScore", economicsScore);
+    replyGetFarmInfo.put("economicsRank", economicsRank);
+    replyGetFarmInfo.put("energyScore", energyScore);
+    replyGetFarmInfo.put("energyRank", energyRank);
+    replyGetFarmInfo.put("environmentScore", environmentScore);
+    replyGetFarmInfo.put("environmentRank", environmentRank);
     sendMessage(replyGetFarmInfo.toJSONString());
   }
 

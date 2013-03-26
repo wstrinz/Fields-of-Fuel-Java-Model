@@ -9,9 +9,12 @@ public class Farm {
 //  private Field[] fields;
   private LinkedList<Field> fields;
   private int capital=10000;
-  private int envScore;
-  private int socScore;
-  private int econScore;
+  private double envScore;
+  private double energyScore;
+  private double econScore;
+  private int envRank;
+  private int energyRank;
+  private int econRank;
   private String currentUser;
   private boolean acceptCornContract;
   private boolean acceptSwitchgrassContract;
@@ -35,35 +38,43 @@ public class Farm {
   public void recomputeScores(){
     this.econScore = calcEconScore();
     this.envScore = calcEnvScore();
-    this.socScore = calcSocScore();
+    this.energyScore = calcEnergyScore();
   }
 
-  public int getEnvScore() {
+  public double getEnvScore() {
     return envScore;
   }
 
-  public int calcEnvScore() {
-    return this.envScore;
+  public double calcEnvScore() {
+    double avgSoc = 0;
+    for(Field f:fields){
+      avgSoc += f.getSOC();
+    }
+    avgSoc /= fields.size();
+    double c_score = avgSoc / 190;
+    double p_score = 0.20151 - ((this.getPhosphorous() - 0.02239) / 0.20151);
+
+    return c_score * .5 + p_score * .5;
   }
 
   public int getCapital() {
     return capital;
   }
 
-  public int getSocScore() {
-    return socScore;
+  public double getEnergyScore() {
+    return energyScore;
   }
 
-  public int calcSocScore() {
-    return this.socScore;
+  public double calcEnergyScore() {
+    return this.energyScore;
   }
 
-  public int getEconScore() {
+  public double getEconScore() {
     return econScore;
   }
 
   public int calcEconScore() {
-    return this.econScore;
+    return this.capital;
   }
 
   public String getName() {
@@ -170,6 +181,30 @@ public class Farm {
   public void updateGBI() {
     //this is going to take some spatial specificty, so save for later
     //Fields are about 65 meters on each side if they are each an acre, so for now maybe
+  }
+
+  public int getEnvRank() {
+    return envRank;
+  }
+
+  public void setEnvRank(int envRank) {
+    this.envRank = envRank;
+  }
+
+  public int getEnergyRank() {
+    return energyRank;
+  }
+
+  public void setEnergyRank(int energyRank) {
+    this.energyRank = energyRank;
+  }
+
+  public int getEconRank() {
+    return econRank;
+  }
+
+  public void setEconRank(int econRank) {
+    this.econRank = econRank;
   }
 
 }

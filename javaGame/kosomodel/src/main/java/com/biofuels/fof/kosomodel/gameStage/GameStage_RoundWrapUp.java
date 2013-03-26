@@ -21,13 +21,15 @@ public class GameStage_RoundWrapUp extends GameStage {
     for (Farm fa:game.getFarms()){
       fa.updatePhosphorous();
       for(Field fi:fa.getFields()){
-        fi.updateSOM();
+        fi.updateSOC();
         fi.addHistoryYear();
       }
     }
 
     game.sellFarmerCrops();
     game.clearFields();
+
+    game.rerankFarms();
 
 
 

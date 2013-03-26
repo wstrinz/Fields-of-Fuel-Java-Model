@@ -1,5 +1,6 @@
 package com.biofuels.fof.kosomodel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -146,6 +147,26 @@ public class Game {
     return farms.get(clientID);
   }
 
+  public void rerankFarms(){
+    ArrayList<Double> econScores = new ArrayList<>();
+    ArrayList<Double> envScores = new ArrayList<>();
+    ArrayList<Double> energyScores = new ArrayList<>();
+    for(Farm f:farms.values()){
+      econScores.add((double)f.calcEconScore());
+      envScores.add(f.calcEnvScore());
+      energyScores.add(f.calcEnergyScore());
+    }
+    Collections.sort(econScores);
+    Collections.sort(envScores);
+    Collections.sort(energyScores);
+    //FIXME Should not be running calculations twice, esp given concurrency issues
+    for(Farm f:farms.values()){
+      f.setEconRank(econScores.indexOf((double)f.calcEconScore()));
+      f.setEnvRank(envScores.indexOf(f.calcEnvScore()));
+      f.setEnergyRank(energyScores.indexOf(f.calcEnergyScore()));
+    }
+  }
+
   public void changeSettings(int fields, boolean contracts, boolean management) {
     int currFields = fieldsPerFarm;
     fieldsPerFarm = fields;
@@ -215,7 +236,8 @@ public class Game {
     return roundManager.getCurrentStageName();
   }
 
-  public int getCapitalRank(Integer clientID) {
+  public int getCapitalRank(Farm farm) {
+
     return -1;
   }
 

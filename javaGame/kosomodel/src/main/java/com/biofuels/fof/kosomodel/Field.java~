@@ -79,7 +79,7 @@ public class Field {
     this.management = management;
   }
 
-  public void updateSOC() {
+  public void updateSOM() {
     int cornVal = this.crop == Crop.CORN ? 1 : 0;
     int grassVal = this.crop == Crop.GRASS ? 1 : 0;
     int coverVal = (this.crop == Crop.COVER || this.crop == Crop.FALLOW) ? 1 : 0;
@@ -88,9 +88,9 @@ public class Field {
     double B1 = 1.17;
     double B2 = 1.04;
     double B3 = 1.1;
-    SOC = SOC * ((B0 * cornVal) + (B1 * grassVal) + (B2 * coverVal) + (B3 * noTill)); // / 20;
+    SOC = SOC * (((B0 * cornVal) + (B1 * grassVal) + (B2 * coverVal) + (B3 * noTill))); /// 20);
 
-    int MAXSOC = 190 ;
+    int MAXSOC = 300 ;
     if (SOC > MAXSOC) //set max of 150 for now (note: not in official model spec)
       SOC = MAXSOC;
   }
@@ -99,7 +99,7 @@ public class Field {
     return SOC;
   }
 
-  public void setSOC(float SOC) {
+  public void setSOM(float SOC) {
     this.SOC = SOC;
   }
 

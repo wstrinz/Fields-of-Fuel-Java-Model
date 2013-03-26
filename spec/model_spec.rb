@@ -791,4 +791,26 @@ describe ModelWrapper do
 
     cornPhos.should > grassPhos
   end
+
+  it "sends score and rank in farm info" do
+    askActor(JoinGameMessage)
+
+    reset_template!
+    @template["event"] = "advanceStage"
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+    askActor(GenericMessage, 1)
+
+    reset_template!
+    @template["event"] = "getFarmInfo"
+    reply = askActor(GenericMessage, 1)
+    reply["sustainabilityScore"].should >= 0
+    reply["sustainabilityRank"].should > 0
+    reply["economicsScore"].should >= 0
+    reply["economicsRank"].should > 0
+    reply["energyScore"].should >= 0
+    reply["energyRank"].should > 0
+    reply["environmentScore"].should >= 0
+    reply["environmentRank"].should > 0
+  end
 end
