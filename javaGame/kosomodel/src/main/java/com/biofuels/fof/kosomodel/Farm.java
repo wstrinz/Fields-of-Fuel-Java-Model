@@ -96,8 +96,8 @@ public class Farm {
     return econScore;
   }
 
-  public int calcEconScore() {
-    return this.capital / game.getLargestEarnings();
+  public double calcEconScore() {
+    return (double)this.capital / (double)game.getLargestEarnings();
   }
 
   public String getName() {
@@ -310,11 +310,6 @@ public class Farm {
       }
     }
     return yield/count;
-  }
-
-  public void removeHarvestedCrops() {
-    // TODO Auto-generated method stub
-
   }
 
 }
