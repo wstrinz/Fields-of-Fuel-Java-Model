@@ -258,7 +258,7 @@ public class Farm {
     double cornYield = this.calcTotalCornYield();
 
     double grassYield = calcTotalGrassYield();
-    System.out.println("corn yield: " + cornYield);
+
     history.addYear(capital, soilSubscore, waterSubscore, this.getOverallScore(), getEconScore(), getEnvScore(),
     getEnergyScore(), getOverallRank(), getEconRank(), getEnvRank(), getEnergyRank(),
     cornYield * Game.CORNPRICE, grassYield * Game.GRASSPRICE, cornYield, grassYield);
