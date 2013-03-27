@@ -223,6 +223,10 @@ public class HandlerHelper {
       this.sendGetFarmerHistory(clientID, roomID, clientID);
       break;
 
+    case "getLatestFarmerHistory":
+      this.sendLatestFarmerHistory(clientID, roomID, clientID);
+      break;
+
     case "joinRoom":
       boolean roomExist = roomExists(roomName);
       boolean shouldMakeNew = false;
@@ -479,17 +483,17 @@ public class HandlerHelper {
       JSONObject year = new JSONObject();
       year.put("year", y.year);
       year.put("earnings", y.earnings);
-      year.put("soilSubscore", Math.round(y.soilSubscore * 100)/100);
-      year.put("waterSubscore", Math.round(y.waterSubscore* 100)/100);
-      year.put("sustainabilityScore", Math.round(y.sustainabilityScore* 100)/100);
-      year.put("environmentScore", Math.round(y.environmentScore* 100)/100);
+      year.put("soilSubscore", y.soilSubscore);
+      year.put("waterSubscore", y.waterSubscore);
+      year.put("sustainabilityScore", y.sustainabilityScore);
+      year.put("environmentScore", y.environmentScore);
       year.put("switchgrassIncome", y.switchgrassIncome);
-      year.put("energyScore", Math.round(y.energyScore* 100)/100);
-      year.put("economicsScore", Math.round(y.economicsScore* 100)/100);
+      year.put("energyScore", y.energyScore);
+      year.put("economicsScore", y.economicsScore);
       year.put("cornIncome", y.cornIncome);
       year.put("switchgrassIncome", y.switchgrassIncome);
-      year.put("cornYield", Math.round(y.cornYield* 100)/100);
-      year.put("grassYield", Math.round(y.grassYield* 100)/100);
+      year.put("cornYield", y.cornYield);
+      year.put("grassYield", y.grassYield);
       year.put("sustainabilityRank", y.sustainabilityRank);
       year.put("economicsRank", y.economicsRank);
       year.put("environmentRank", y.environmentRank);
@@ -502,6 +506,36 @@ public class HandlerHelper {
     sendMessage(reply.toJSONString());
 
 
+  }
+
+  @SuppressWarnings("unchecked")
+  private void sendLatestFarmerHistory(Integer clientID, String roomID, Object sendAddr){
+    JSONObject reply = new JSONObject();
+    Game game = games.get(roomID);
+    Farm farm = game.getFarm(clientID);
+    FarmHistory.HistoryYear y = farm.getHistory().getLast();
+    JSONObject year = new JSONObject();
+    year.put("year", y.year);
+    year.put("earnings", y.earnings);
+    year.put("soilSubscore", y.soilSubscore);
+    year.put("waterSubscore", y.waterSubscore);
+    year.put("sustainabilityScore", y.sustainabilityScore);
+    year.put("environmentScore", y.environmentScore);
+    year.put("switchgrassIncome", y.switchgrassIncome);
+    year.put("energyScore", y.energyScore);
+    year.put("economicsScore", y.economicsScore);
+    year.put("cornIncome", y.cornIncome);
+    year.put("switchgrassIncome", y.switchgrassIncome);
+    year.put("cornYield", y.cornYield);
+    year.put("grassYield", y.grassYield);
+    year.put("sustainabilityRank", y.sustainabilityRank);
+    year.put("economicsRank", y.economicsRank);
+    year.put("environmentRank", y.environmentRank);
+    year.put("energyRank", y.energyRank);
+    reply.put("event", "getFarmerHistory");
+    reply.put("year", year);
+    reply.put("clientID", sendAddr);
+    sendMessage(reply.toJSONString());
   }
 
   @SuppressWarnings("unchecked")
