@@ -532,8 +532,8 @@ public class HandlerHelper {
     year.put("economicsRank", y.economicsRank);
     year.put("environmentRank", y.environmentRank);
     year.put("energyRank", y.energyRank);
-    reply.put("event", "getFarmerHistory");
-    reply.put("year", year);
+    reply.put("event", "getLatestFarmerHistory");
+    reply.put("yearInfo", year);
     reply.put("clientID", sendAddr);
     sendMessage(reply.toJSONString());
   }
