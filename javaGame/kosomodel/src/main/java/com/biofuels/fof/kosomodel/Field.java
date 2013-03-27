@@ -13,7 +13,8 @@ public class Field {
   private double lastYield;
 
   public Field() {
-    setCrop(Crop.CORN);
+//    setCrop(Crop.CORN);
+    setCrop(Crop.FALLOW);
     management = new ManagementOptions();
     history = new FieldHistory();
     this.SOC=50;
@@ -84,13 +85,18 @@ public class Field {
     int grassVal = this.crop == Crop.GRASS ? 1 : 0;
     int coverVal = (this.crop == Crop.COVER || this.crop == Crop.FALLOW) ? 1 : 0;
     int noTill = this.management.till ? 0 : 1;
+    int MAXSOC = 190 ;
+
     double B0 = 0.8;
     double B1 = 1.17;
     double B2 = 1.04;
     double B3 = 1.1;
-    SOC = SOC * ((B0 * cornVal) + (B1 * grassVal) + (B2 * coverVal) + (B3 * noTill)); // / 20;
 
-    int MAXSOC = 190 ;
+    double r = ((B0 * cornVal) + (B1 * grassVal) + (B2 * coverVal) + (B3 * noTill));
+    double delta = ((r-1)*(1 - (SOC/MAXSOC))) * SOC;
+    SOC += delta;
+
+
     if (SOC > MAXSOC) //set max of 150 for now (note: not in official model spec)
       SOC = MAXSOC;
   }
@@ -120,11 +126,11 @@ public class Field {
   }
 
   public double calculateYield() {
-    double B0Corn = 0.1377;
+    double B0Corn = 0.1164;
     double B0Grass = -0.9556;
-    double B0Cover = -0.9556;
+    double B0Cover = -0.08196;
 
-    double B1Corn = 3.4142;
+    double B1Corn = 2.8849;
     double B1Grass = 2.4093;
     double B1Cover = 2.40141;
 

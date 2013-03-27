@@ -32,11 +32,15 @@ public class GameStage_RoundWrapUp extends GameStage {
       fa.recomputeScores();
     }
 
-    game.clearFields();
+
 
     game.rerankFarms();
 
+    for (Farm fa:game.getFarms()){
+      fa.addHistoryYear();
+    }
 
+    game.clearFields();
 
   }
   public void Exit() {}

@@ -17,6 +17,10 @@ public class Farm {
   private int econRank;
   private double overallScore;
   private int overallRank;
+
+  private double soilSubscore;
+  private double waterSubscore;
+
   private String currentUser;
   private boolean acceptCornContract;
   private boolean acceptSwitchgrassContract;
@@ -24,15 +28,16 @@ public class Farm {
   private double phosphorous;
   private double GBI; //Grassland Bird Index
   private Game game;
+  private FarmHistory history;
 
 
   public Farm(String name, int capital, Game g) {
     this.name = name;
     this.capital = capital;
     this.game = g;
+    history = new FarmHistory();
     fields = new LinkedList<Field>();
     //    fields[0].setCrop(Crop.GRASS);
-    // TODO Auto-generated constructor stub
   }
 
   public LinkedList<Field> getFields(){
@@ -55,10 +60,10 @@ public class Farm {
       avgSoc += f.getSOC();
     }
     avgSoc /= fields.size();
-    double c_score = avgSoc / 190;
-    double p_score = 0.20151 - ((this.getPhosphorous() - 0.02239) / 0.20151);
+    this.soilSubscore = avgSoc / 190;
+    this.waterSubscore = 1 - ((this.getPhosphorous() - 0.0363) / 0.1876);
 
-    return c_score * .5 + p_score * .5;
+    return soilSubscore * .5 + waterSubscore * .5;
   }
 
   public int getCapital() {
@@ -70,7 +75,21 @@ public class Farm {
   }
 
   public double calcEnergyScore() {
-    return this.energyScore;
+    double EMAX = 210666.6;
+
+    //Energy is Mj per Mg (?)
+    double energyKernel = 18800.0;
+    double energyStover = 17700.0;
+    double energyGrass = 17700.0;
+
+    double cornYield = this.calcTotalCornYield();
+    double grassYield = this.calcTotalGrassYield();
+
+    double cornEnergy = ((cornYield / 2) * energyKernel) + ((cornYield / 4) * energyStover);
+    double grassEnergy = grassYield * energyGrass;
+
+
+    return ((cornEnergy + grassEnergy) / fields.size()) / EMAX;
   }
 
   public double getEconScore() {
@@ -118,7 +137,6 @@ public class Farm {
   }
 
   public void setField(Integer fieldNum, String crop) {
-    // TODO Auto-generated method stub
 //    System.out.println("planting " + crop + " on field " + fieldNum);
     switch (crop){
     case "grass":
@@ -126,6 +144,9 @@ public class Farm {
       break;
     case "corn":
       fields.get(fieldNum).setCrop(Crop.CORN);
+      break;
+    case "cover":
+      fields.get(fieldNum).setCrop(Crop.COVER);
       break;
     case "none":
       fields.get(fieldNum).setCrop(Crop.FALLOW);
@@ -225,6 +246,75 @@ public class Farm {
 
   public void setOverallRank(int overallRank) {
     this.overallRank = overallRank;
+  }
+
+  public LinkedList<FarmHistory.HistoryYear> getHistory() {
+    return history.getHistory();
+  }
+
+  public void addHistoryYear() {
+    // TODO Add real prices
+
+    double cornYield = this.calcTotalCornYield();
+
+    double grassYield = calcTotalGrassYield();
+    System.out.println("corn yield: " + cornYield);
+    history.addYear(capital, soilSubscore, waterSubscore, this.getOverallScore(), getEconScore(), getEnvScore(),
+    getEnergyScore(), getOverallRank(), getEconRank(), getEnvRank(), getEnergyRank(),
+    cornYield * Game.CORNPRICE, grassYield * Game.GRASSPRICE, cornYield, grassYield);
+  }
+
+  private double calcTotalGrassYield() {
+    double yield = 0;
+    for(Field f:fields){
+      if(f.getCrop() == Crop.GRASS){
+        yield += f.calculateYield();
+      }
+    }
+    return yield;
+  }
+
+  private double calcTotalCornYield() {
+    double yield = 0;
+//    System.out.print("Fields: ");
+    for(Field f:fields){
+//      System.out.print(f.getCrop() + ", ");
+      if(f.getCrop() == Crop.CORN){
+        yield += f.calculateYield();
+//        System.out.print(" yield("+f.calculateYield()+")");
+      }
+    }
+//    System.out.print("\n");
+    return yield;
+  }
+
+  private double calcAvgGrassYield() {
+    double yield = 0;
+    double count = 0;
+    for(Field f:fields){
+      if(f.getCrop() == Crop.GRASS){
+        yield += f.calculateYield();
+        count ++;
+      }
+    }
+    return yield/count;
+  }
+
+  private double calcAvgCornYield() {
+    double yield = 0;
+    double count = 0;
+    for(Field f:fields){
+      if(f.getCrop() == Crop.CORN){
+        yield += f.calculateYield();
+        count ++;
+      }
+    }
+    return yield/count;
+  }
+
+  public void removeHarvestedCrops() {
+    // TODO Auto-generated method stub
+
   }
 
 }

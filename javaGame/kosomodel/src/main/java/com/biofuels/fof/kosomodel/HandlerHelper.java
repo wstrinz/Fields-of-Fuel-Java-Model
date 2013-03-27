@@ -219,6 +219,10 @@ public class HandlerHelper {
       sendCurrentSettings(clientID, roomID, clientID);
       break;
 
+    case "getFarmerHistory":
+      this.sendGetFarmerHistory(clientID, roomID, clientID);
+      break;
+
     case "joinRoom":
       boolean roomExist = roomExists(roomName);
       boolean shouldMakeNew = false;
@@ -466,6 +470,41 @@ public class HandlerHelper {
   }
 
   @SuppressWarnings("unchecked")
+  private void sendGetFarmerHistory(Integer clientID, String roomID, Object sendAddr){
+    JSONObject reply = new JSONObject();
+    Game game = games.get(roomID);
+    Farm farm = game.getFarm(clientID);
+    JSONArray years = new JSONArray();
+    for(FarmHistory.HistoryYear y: farm.getHistory()){
+      JSONObject year = new JSONObject();
+      year.put("year", y.year);
+      year.put("earnings", y.earnings);
+      year.put("soilSubscore", y.soilSubscore);
+      year.put("waterSubscore", y.waterSubscore);
+      year.put("sustainabilityScore", y.sustainabilityScore);
+      year.put("environmentScore", y.environmentScore);
+      year.put("switchgrassIncome", y.switchgrassIncome);
+      year.put("energyScore", y.energyScore);
+      year.put("economicsScore", y.economicsScore);
+      year.put("cornIncome", y.cornIncome);
+      year.put("switchgrassIncome", y.switchgrassIncome);
+      year.put("cornYield", y.cornYield);
+      year.put("grassYield", y.grassYield);
+      year.put("sustainabilityRank", y.sustainabilityRank);
+      year.put("economicsRank", y.economicsRank);
+      year.put("environmentRank", y.environmentRank);
+      year.put("energyRank", y.energyRank);
+      years.add(year);
+    }
+    reply.put("event", "getFarmerHistory");
+    reply.put("years", years);
+    reply.put("clientID", sendAddr);
+    sendMessage(reply.toJSONString());
+
+
+  }
+
+  @SuppressWarnings("unchecked")
   private void sendCurrentSettings(Integer clientID, String roomID, Object sendAddr){
     JSONObject reply = new JSONObject();
     reply.put("event", "changeSettings");
@@ -485,4 +524,6 @@ public class HandlerHelper {
     sendMessage(replyAdvanceStage.toJSONString());
 
   }
+
+
 }

@@ -277,13 +277,13 @@ describe ModelWrapper do
     joinReply[3]["Farmers"][0]["name"].should == @template["userName"]
   end
 
-  it "is assigned 2 fields with corn on loading" do
+  it "is assigned 2 empty fields on loading" do
     askActor(JoinGameMessage)
 
     # fields = askActor(LoadFieldsMessage)["fields"]
     reset_template!
 
-    askActor(LoadFieldsMessage)["fields"][0]["crop"].should == "CORN"
+    askActor(LoadFieldsMessage)["fields"][0]["crop"].should == "FALLOW"
   end
 
   it "can plant switchgrass on first field" do
@@ -437,6 +437,10 @@ describe ModelWrapper do
     startCapital.should >= 0
 
     reset_template!
+    @template["crop"] = "corn"
+    askActor(PlantMessage, 0)
+
+    reset_template!
     @template["event"] = "advanceStage"
     askActor(GenericMessage, 1)["stageNumber"].should == 1 #grow
     askActor(GenericMessage, 1) #2 #wrapup
@@ -500,8 +504,14 @@ describe ModelWrapper do
     original_SOM0 = fields[0]["SOM"]
     original_SOM1 = fields[1]["SOM"]
 
+
     reset_template!
     @template["crop"] = "grass"
+    askActor(PlantMessage, 0)
+
+    reset_template!
+    @template["crop"] = "corn"
+    @template["field"] = 1
     askActor(PlantMessage, 0)
 
     reset_template!
@@ -794,6 +804,10 @@ describe ModelWrapper do
 
   it "sends score and rank in farm info" do
     askActor(JoinGameMessage)
+
+    reset_template!
+    @template["crop"] = "corn"
+    askActor(PlantMessage, 0)
 
     reset_template!
     @template["event"] = "advanceStage"
