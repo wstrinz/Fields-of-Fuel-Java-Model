@@ -141,6 +141,13 @@ public class Field {
     double B0 = B0Corn * cornVal + B0Grass * grassVal + B0Cover * coverVal;
     double B1 = B1Corn * cornVal + B1Grass * grassVal + B1Cover * coverVal;
 
+    //Don't grow switchgrass on first year. leaving off since switchgrass yield doesn't grow over time.
+    //TODO Should also add a get latest year method to history for conveniences
+//    if(history.getHistory().get(history.getHistory().size()-1).crop == Crop.GRASS){
+//      B0 = 0;
+//      B1 = 0;
+//    }
+
     return B0 + B1 * Math.log(this.getSOC());
   }
 

@@ -30,7 +30,7 @@ public class HandlerHelper {
 
   @SuppressWarnings("unchecked")
   public String[] handle(String event){
-//    System.out.println("Handling " + event);
+    //    System.out.println("Handling " + event);
     ArrayList<String> replies = new ArrayList<>();
 
     JSONObject eventObj = (JSONObject) JSONValue.parse(event);
@@ -95,32 +95,32 @@ public class HandlerHelper {
 
     case "createRoom":
 
-            if(games.get(roomName) != null){
-              sendMessage(buildJson(clientID.toString(), "createRoom", "result", false));
+      if(games.get(roomName) != null){
+        sendMessage(buildJson(clientID.toString(), "createRoom", "result", false));
 
-            }
-            else if(((String)eventObj.get("password")).length()>0){
-              games.put(roomName, new Game(roomName, (String)eventObj.get("password"), (long)eventObj.get("playerCount")));
-              sendMessage(buildJson(clientID.toString(), "createRoom","result",true));
-            }
-            else{
-              games.put(roomName, new Game(roomName, (long)eventObj.get("playerCount")));
-              sendMessage(buildJson(clientID.toString(), "createRoom","result",true));
-            }
+      }
+      else if(((String)eventObj.get("password")).length()>0){
+        games.put(roomName, new Game(roomName, (String)eventObj.get("password"), (long)eventObj.get("playerCount")));
+        sendMessage(buildJson(clientID.toString(), "createRoom","result",true));
+      }
+      else{
+        games.put(roomName, new Game(roomName, (long)eventObj.get("playerCount")));
+        sendMessage(buildJson(clientID.toString(), "createRoom","result",true));
+      }
 
-            //replies.add("{\"event\":\"createRoom\",\"result\":true}");
-            break;
+      //replies.add("{\"event\":\"createRoom\",\"result\":true}");
+      break;
 
     case "validateUserName":
-       roomResult = (roomExists(roomName) && !games.get(roomName).isFull());
+      roomResult = (roomExists(roomName) && !games.get(roomName).isFull());
       boolean nameResult = false;
-       needsPass = false;
-       correctPass = false;
-       if(roomResult){
-//        System.out.println("user " + eventObj.get("userName"));
+      needsPass = false;
+      correctPass = false;
+      if(roomResult){
+        //        System.out.println("user " + eventObj.get("userName"));
         nameResult = !eventObj.get("userName").equals("");
         nameResult = nameResult && ((!farmerExistsInRoom(farmerName, roomName)
-                || (deviseName != null && games.get(roomName).getFarm(farmerName).getCurrentUser().equals(deviseName))));
+            || (deviseName != null && games.get(roomName).getFarm(farmerName).getCurrentUser().equals(deviseName))));
         needsPass = games.get(roomName).hasPassword();
         if(needsPass){
           correctPass = games.get(roomName).getPassword().equals(eventObj.get("password"));
@@ -161,36 +161,36 @@ public class HandlerHelper {
         JSONObject farm = new JSONObject();
         farm.put("name", f.getName());
         farm.put("ready", f.isReady());
-//        list.add("\""+f.getName()+"\"");
-//        list.add(false);
+        //        list.add("\""+f.getName()+"\"");
+        //        list.add(false);
         list.add(farm);
       }
       msg.put("event", "farmerList");
       msg.put("clientID", clientID);
       msg.put("Farmers", list);
-//      System.out.println(msg.toJSONString());
+      //      System.out.println(msg.toJSONString());
       sendMessage(msg.toJSONString());
-    break;
+      break;
 
     case "plantField":
       //System.out.println("planting");
       games.get(roomID).getFarm(clientID).setField(((Long)eventObj.get("field")).intValue(),(String) eventObj.get("crop"));
-    break;
+      break;
 
     case "setFieldManagement":
       int field = ((Long)eventObj.get("field")).intValue();
       String technique = (String) eventObj.get("technique");
       boolean value = (boolean) eventObj.get("value");
       games.get(roomID).getFarm(clientID).changeFieldManagement(field, technique, value);
-    break;
+      break;
 
     case "getGameInfo":
       sendGetGameInfo(roomID, clientID);
-    break;
+      break;
 
     case "advanceStage":
       doAdvanceStage(roomID);
-    break;
+      break;
 
     case "farmerReady":
       Game g = games.get(roomID);
@@ -202,13 +202,13 @@ public class HandlerHelper {
 
     case "getFarmInfo":
       sendGetFarmInfo(clientID, roomID, clientID);
-//      int earnings = games.get(roomID).getFarm(clientID).getCapital();
-//      int earningsRank = games.get(roomID).getCapitalRank(clientID);
-//      JSONObject reply = new JSONObject();
-//      reply.put("event", "getFarmInfo");
-//      reply.put("capital", earnings);
-//      reply.put("capitalRank", earningsRank);
-//      sendMessage(reply.toJSONString());
+      //      int earnings = games.get(roomID).getFarm(clientID).getCapital();
+      //      int earningsRank = games.get(roomID).getCapitalRank(clientID);
+      //      JSONObject reply = new JSONObject();
+      //      reply.put("event", "getFarmInfo");
+      //      reply.put("capital", earnings);
+      //      reply.put("capitalRank", earningsRank);
+      //      sendMessage(reply.toJSONString());
       break;
 
     case "getFarmHistory":
@@ -225,6 +225,10 @@ public class HandlerHelper {
 
     case "getLatestFarmerHistory":
       this.sendLatestFarmerHistory(clientID, roomID, clientID);
+      break;
+
+    case "getLatestFieldHistory":
+      this.sendLatestFieldHistory(clientID, roomID, clientID);
       break;
 
     case "joinRoom":
@@ -282,7 +286,7 @@ public class HandlerHelper {
   @SuppressWarnings("unchecked")
   private void doAdvanceStage(String roomID) {
     // TODO Auto-generated method stub
-//    System.out.println("advancing");
+    //    System.out.println("advancing");
     games.get(roomID).advanceStage();
 
     int stage = games.get(roomID).getStageNumber();
@@ -328,7 +332,7 @@ public class HandlerHelper {
 
   private void sendMessage(String message) {
     EventMessage msg = new EventMessage(message);
-//    System.out.println("sending " + msg.message);
+    //    System.out.println("sending " + msg.message);
     listener.tell(msg, handler);
   }
 
@@ -382,12 +386,12 @@ public class HandlerHelper {
 
   @SuppressWarnings("unchecked")
   public void sendGetFarmInfo(int clientID, String roomID,  Object sendAddr){
-//    if(roomID == null)
-//      System.out.println("null room id");
-//    else
-//      System.out.println(roomID);
-//
-//    System.out.println(clientID);
+    //    if(roomID == null)
+    //      System.out.println("null room id");
+    //    else
+    //      System.out.println(roomID);
+    //
+    //    System.out.println(clientID);
     Game game = games.get(roomID);
     Farm farm = game.getFarm(clientID);
     int earnings = game.getFarm(clientID).getCapital();
@@ -432,7 +436,7 @@ public class HandlerHelper {
     List<String> enabledStages = games.get(roomID).getEnabledStages();
     JSONArray stages = new JSONArray();
     stages.addAll(enabledStages);
-//    System.out.println(enabledStages.toString());
+    //    System.out.println(enabledStages.toString());
 
 
     JSONObject replyGameInfo = new JSONObject();
@@ -446,7 +450,7 @@ public class HandlerHelper {
 
   @SuppressWarnings("unchecked")
   private void sendGetFarmHistory(Integer clientID, String roomID, Object sendAddr) {
-//    List<Field> fields = games.get(roomID).getFarm(clientID).getFields();
+    //    List<Field> fields = games.get(roomID).getFarm(clientID).getFields();
     JSONObject reply = new JSONObject();
     JSONArray fields = new JSONArray();
     for(Field f:games.get(roomID).getFarm(clientID).getFields()){
@@ -474,11 +478,41 @@ public class HandlerHelper {
   }
 
   @SuppressWarnings("unchecked")
+  private void sendLatestFieldHistory(Integer clientID, String roomID, Object sendAddr){
+    JSONObject reply = new JSONObject();
+    JSONArray fields = new JSONArray();
+    for(Field f:games.get(roomID).getFarm(clientID).getFields()){
+
+      FieldHistory history = f.getHistory();
+      if(history == null){
+        System.out.println("history null!");
+      }
+      FieldHistory.HistoryYear y = history.getHistory().getLast();
+      JSONObject year = new JSONObject();
+      year.put("year", y.year);
+      year.put("SOM", y.SOM);
+      year.put("crop", y.crop.toString());
+      year.put("yield", y.yield);
+      year.put("fertilizer", y.fertilizer);
+      year.put("pesticide", y.pesticide);
+      year.put("till", y.till);
+      //seasons.add(year);
+      fields.add(year);
+
+    }
+    reply.put("event", "getLatestFieldHistory");
+    reply.put("clientID", sendAddr);
+    reply.put("fields", fields);
+    sendMessage(reply.toJSONString());
+  }
+
+  @SuppressWarnings("unchecked")
   private void sendGetFarmerHistory(Integer clientID, String roomID, Object sendAddr){
     JSONObject reply = new JSONObject();
     Game game = games.get(roomID);
     Farm farm = game.getFarm(clientID);
     JSONArray years = new JSONArray();
+
     for(FarmHistory.HistoryYear y: farm.getHistory()){
       JSONObject year = new JSONObject();
       year.put("year", y.year);
@@ -500,6 +534,7 @@ public class HandlerHelper {
       year.put("energyRank", y.energyRank);
       years.add(year);
     }
+
     reply.put("event", "getFarmerHistory");
     reply.put("years", years);
     reply.put("clientID", sendAddr);
