@@ -451,15 +451,36 @@ public class HandlerHelper {
   @SuppressWarnings("unchecked")
   private void sendGetFarmHistory(Integer clientID, String roomID, Object sendAddr) {
     //    List<Field> fields = games.get(roomID).getFarm(clientID).getFields();
-    JSONObject reply = new JSONObject();
-    JSONArray fields = new JSONArray();
-    for(Field f:games.get(roomID).getFarm(clientID).getFields()){
-      JSONArray seasons = new JSONArray();
+
+    for(int i = 0;i<games.get(roomID).getYear();i++){
+      JSONObject reply = new JSONObject();
+      JSONArray fields = new JSONArray();
+      for(Field f:games.get(roomID).getFarm(clientID).getFields()){
+        FieldHistory.HistoryYear y = f.getHistory().getHistory().get(i);
+        JSONObject field = new JSONObject();
+        field.put("SOM", y.SOM);
+        field.put("crop", y.crop.toString());
+        field.put("yield", y.yield);
+        field.put("fertilizer", y.fertilizer);
+        field.put("pesticide", y.pesticide);
+        field.put("till", y.till);
+        field.put("year", i);
+        fields.add(field);
+      }
+      reply.put("event", "getLatestFieldHistory");
+      reply.put("clientID", sendAddr);
+      reply.put("fields", fields);
+      sendMessage(reply.toJSONString());
+    }
+
+    /*for(Field f:games.get(roomID).getFarm(clientID).getFields()){
+      JSONObject reply = new JSONObject();
+      JSONArray fields = new JSONArray();
       FieldHistory history = f.getHistory();
       if(history == null){
         System.out.println("history null!");
       }
-      for(FieldHistory.HistoryYear y:history.getHistory()){
+      FieldHistory.HistoryYear y = history.getHistory().getLast()
         JSONObject year = new JSONObject();
         year.put("SOM", y.SOM);
         year.put("crop", y.crop.toString());
@@ -468,13 +489,14 @@ public class HandlerHelper {
         year.put("pesticide", y.pesticide);
         year.put("till", y.till);
         seasons.add(year);
-      }
+
       fields.add(seasons);
-    }
-    reply.put("event", "getFarmHistory");
-    reply.put("clientID", sendAddr);
-    reply.put("fields", fields);
-    sendMessage(reply.toJSONString());
+      reply.put("event", "getFarmHistory");
+      reply.put("clientID", sendAddr);
+      reply.put("fields", fields);
+      sendMessage(reply.toJSONString());
+    }*/
+
   }
 
   @SuppressWarnings("unchecked")
@@ -508,12 +530,13 @@ public class HandlerHelper {
 
   @SuppressWarnings("unchecked")
   private void sendGetFarmerHistory(Integer clientID, String roomID, Object sendAddr){
-    JSONObject reply = new JSONObject();
+//
     Game game = games.get(roomID);
     Farm farm = game.getFarm(clientID);
-    JSONArray years = new JSONArray();
+//    JSONArray years = new JSONArray();
 
     for(FarmHistory.HistoryYear y: farm.getHistory()){
+      JSONObject reply = new JSONObject();
       JSONObject year = new JSONObject();
       year.put("year", y.year);
       year.put("earnings", y.earnings);
@@ -532,13 +555,14 @@ public class HandlerHelper {
       year.put("economicsRank", y.economicsRank);
       year.put("environmentRank", y.environmentRank);
       year.put("energyRank", y.energyRank);
-      years.add(year);
+      reply.put("event", "getLatestFarmerHistory");
+      reply.put("yearInfo", year);
+      reply.put("clientID", sendAddr);
+      sendMessage(reply.toJSONString());
     }
 
-    reply.put("event", "getFarmerHistory");
-    reply.put("years", years);
-    reply.put("clientID", sendAddr);
-    sendMessage(reply.toJSONString());
+
+//    sendMessage(reply.toJSONString());
 
 
   }
