@@ -76,8 +76,9 @@ public class Game {
   public void addFarmer(String newPlayer, int clientID) {
     Farm f = new Farm(newPlayer, 1000, this);
     f.setClientID(clientID);
-    f.getFields().add(new Field());
-    f.getFields().add(new Field());
+    for(int i = 0;i<getFieldsPerFarm();i++){
+      f.getFields().add(new Field());
+    }
     farms.put(clientID, f);
 
   }

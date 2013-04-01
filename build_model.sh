@@ -1,2 +1,2 @@
 cd javaGame/kosomodel
-mvn package
+mvn -e package
