@@ -19,4 +19,9 @@ public class GameStage_FinalWrapUp extends GameStage {
     // TODO Auto-generated method stub
     return "Final Wrap Up";
   }
+  @Override
+  public boolean passThrough() {
+    // TODO Auto-generated method stub
+    return false;
+  }
 }

@@ -20,7 +20,7 @@ public class Game {
   private long maxPlayers;
   private RoundManager roundManager;
   private int readyFarmers;
-  private int gameYear=0;
+  private int gameYear=1;
   private int fieldsPerFarm=2;
 
   //TODO have real prices
@@ -308,7 +308,6 @@ public class Game {
   }
 
   public int getLargestEarnings() {
-    // FIXME probably a better method. go away im sleepy
     int max = -1;
     for(Farm f:farms.values()){
       if(f.getCapital() > max){

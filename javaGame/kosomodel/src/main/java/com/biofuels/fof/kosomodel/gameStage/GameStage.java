@@ -17,6 +17,7 @@ public abstract class GameStage {
   }
   // Checks current game settings about whether this game stage should be entered or skipped
   public abstract boolean ShouldEnter();
+  public abstract boolean passThrough();
 
   // Called when game enters the given stage
   public abstract void Enter();

@@ -228,8 +228,12 @@ public class HandlerHelper {
       break;
 
     case "getLatestFieldHistory":
-      this.sendLatestFieldHistory(clientID, roomID, clientID);
+      this.sendLatestFieldHistory(clientID, roomID, clientID, ((Long)eventObj.get("field")).intValue());
       break;
+
+    /*case "getFieldHistorySequence":
+      this.sendFieldHistorySequence(clientID, roomID, clientID, (int) eventObj.get("year"));
+      break;*/
 
     case "joinRoom":
       boolean roomExist = roomExists(roomName);
@@ -264,6 +268,7 @@ public class HandlerHelper {
         }
         msg.put("event", "farmerList");
         msg.put("clientID", roomName);
+        msg.put("year", games.get(roomName).getYear());
         msg.put("Farmers", list);
         sendMessage(msg.toJSONString());
       }
@@ -282,6 +287,11 @@ public class HandlerHelper {
     }*/
 
 
+
+  private void sendFieldHistorySequence(Integer clientID, String roomID,
+      Integer clientID2, int year) {
+
+  }
 
   @SuppressWarnings("unchecked")
   private void doAdvanceStage(String roomID) {
@@ -399,7 +409,6 @@ public class HandlerHelper {
 
 
     //double economicsScore = farm.getEconScore();
-    Double b = new Double(3.112);
 
     double economicsScore = farm.getCapital();
     int economicsRank = farm.getEconRank();
@@ -500,10 +509,11 @@ public class HandlerHelper {
   }
 
   @SuppressWarnings("unchecked")
-  private void sendLatestFieldHistory(Integer clientID, String roomID, Object sendAddr){
+  private void sendLatestFieldHistory(Integer clientID, String roomID, Object sendAddr, int field){
     JSONObject reply = new JSONObject();
     JSONArray fields = new JSONArray();
-    for(Field f:games.get(roomID).getFarm(clientID).getFields()){
+    Field f = games.get(roomID).getFarm(clientID).getFields().get(field);
+
 
       FieldHistory history = f.getHistory();
       if(history == null){
@@ -521,10 +531,10 @@ public class HandlerHelper {
       //seasons.add(year);
       fields.add(year);
 
-    }
     reply.put("event", "getLatestFieldHistory");
     reply.put("clientID", sendAddr);
     reply.put("fields", fields);
+    reply.put("fieldNum", field);
     sendMessage(reply.toJSONString());
   }
 
@@ -605,6 +615,7 @@ public class HandlerHelper {
     reply.put("mgmtOptsOn", games.get(roomID).isManagement());
     reply.put("fields", games.get(roomID).getFieldsPerFarm());
     reply.put("clientID", sendAddr);
+
     sendMessage(reply.toJSONString());
 
     int stage = games.get(roomID).getStageNumber();
@@ -614,6 +625,7 @@ public class HandlerHelper {
     replyAdvanceStage.put("stageNumber", stage);
     replyAdvanceStage.put("stageName", roundName);
     replyAdvanceStage.put("clientID", sendAddr);
+    replyAdvanceStage.put("year", games.get(roomID).getYear());
     sendMessage(replyAdvanceStage.toJSONString());
 
   }

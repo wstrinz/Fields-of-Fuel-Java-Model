@@ -20,4 +20,9 @@ public class GameStage_Plant extends GameStage {
     // TODO Auto-generated method stub
     return "Plant";
   }
+  @Override
+  public boolean passThrough() {
+    // TODO Auto-generated method stub
+    return false;
+  }
 }

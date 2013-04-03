@@ -19,4 +19,9 @@ public class GameStage_Contracts extends GameStage {
     // TODO Auto-generated method stub
     return "Accept/Reject Contracts";
   }
+  @Override
+  public boolean passThrough() {
+    // TODO Auto-generated method stub
+    return false;
+  }
 }

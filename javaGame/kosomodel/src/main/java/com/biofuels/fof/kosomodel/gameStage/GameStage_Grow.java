@@ -11,7 +11,7 @@ public class GameStage_Grow extends GameStage {
     super(g);
     // TODO Auto-generated constructor stub
   }
-  public boolean ShouldEnter() {return true; }
+  public boolean ShouldEnter() { return true; }
   public void Enter() {}
   public void Exit() {}
   public void HandleClientData(JSONObject data) {}
@@ -19,5 +19,10 @@ public class GameStage_Grow extends GameStage {
   public String getName() {
     // TODO Auto-generated method stub
     return "Grow";
+  }
+  @Override
+  public boolean passThrough() {
+    // TODO Auto-generated method stub
+    return true;
   }
 }

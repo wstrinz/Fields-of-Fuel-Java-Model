@@ -145,6 +145,15 @@ describe ModelWrapper do
     result
   end
 
+  def advanceYear(years=1, stages=2)
+    @template["event"] = "advanceStage"
+    years.times do
+      stages.times do
+        reply = askActor(GenericMessage, 1)
+      end
+    end
+  end
+
   def reset_template!
     @template = {
       "roomName" => "noNameRoom",
@@ -393,8 +402,7 @@ describe ModelWrapper do
     reset_template!
     @template["event"] = "advanceStage"
 
-    askActor(GenericMessage, 1)["stageNumber"].should == 1 #1
-    askActor(GenericMessage, 1) #2
+    askActor(GenericMessage, 1)["stageNumber"].should == 2 #1
     askActor(GenericMessage, 1)["stageNumber"].should == 0 #0
   end
 
@@ -415,7 +423,6 @@ describe ModelWrapper do
     @template["event"] = "advanceStage"
     askActor(GenericMessage, 1)["stageNumber"].should == 1
     askActor(GenericMessage, 1)["stageNumber"].should == 2
-    askActor(GenericMessage, 1)["stageNumber"].should == 3
     askActor(GenericMessage, 1)["stageNumber"].should == 4
     askActor(GenericMessage, 1)["stageNumber"].should == 0
     askActor(GenericMessage, 1)["stageNumber"].should == 1
@@ -710,10 +717,11 @@ describe ModelWrapper do
     nYears = 10
     nYears.times do |t|
       reset_template!
-      @template["event"] = "advanceStage"
-      askActor(GenericMessage, 1)
-      askActor(GenericMessage, 1)
-      askActor(GenericMessage, 1)
+      advanceYear()
+      # @template["event"] = "advanceStage"
+      # askActor(GenericMessage, 1)
+      # askActor(GenericMessage, 1)
+      # askActor(GenericMessage, 1)
 
       reset_template!
       @template["crop"] = "grass"
@@ -739,10 +747,11 @@ describe ModelWrapper do
     askActor(PlantMessage, 0)
 
     reset_template!
-    @template["event"] = "advanceStage"
-    askActor(GenericMessage, 1)
-    askActor(GenericMessage, 1)
-    askActor(GenericMessage, 1)
+    # @template["event"] = "advanceStage"
+    # askActor(GenericMessage, 1)
+    # askActor(GenericMessage, 1)
+    # askActor(GenericMessage, 1)
+    advanceYear()
 
     reset_template!
     @template["event"] = "getFarmHistory"
@@ -769,7 +778,8 @@ describe ModelWrapper do
     @template["field"] = 1
     askActor(PlantMessage, 0)
 
-    reset_template!
+    advanceYear()
+
     @template["event"] = "advanceStage"
     askActor(GenericMessage, 1)
     askActor(GenericMessage, 1)
@@ -788,11 +798,7 @@ describe ModelWrapper do
     @template["field"] = 1
     askActor(PlantMessage, 0)
 
-    reset_template!
-    @template["event"] = "advanceStage"
-    askActor(GenericMessage, 1)
-    askActor(GenericMessage, 1)
-    askActor(GenericMessage, 1)
+    advanceYear()
 
     reset_template!
     @template["event"] = "getFarmInfo"
@@ -809,11 +815,12 @@ describe ModelWrapper do
     @template["crop"] = "corn"
     askActor(PlantMessage, 0)
 
-    reset_template!
-    @template["event"] = "advanceStage"
-    askActor(GenericMessage, 1)
-    askActor(GenericMessage, 1)
-    askActor(GenericMessage, 1)
+    advanceYear()
+    # reset_template!
+    # @template["event"] = "advanceStage"
+    # askActor(GenericMessage, 1)
+    # askActor(GenericMessage, 1)
+    # askActor(GenericMessage, 1)
 
     reset_template!
     @template["event"] = "getFarmInfo"

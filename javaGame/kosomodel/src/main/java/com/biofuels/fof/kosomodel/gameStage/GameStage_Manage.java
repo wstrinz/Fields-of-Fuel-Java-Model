@@ -20,4 +20,9 @@ public class GameStage_Manage extends GameStage {
     // TODO Auto-generated method stub
     return "Manage";
   }
+  @Override
+  public boolean passThrough() {
+    // TODO Auto-generated method stub
+    return false;
+  }
 }

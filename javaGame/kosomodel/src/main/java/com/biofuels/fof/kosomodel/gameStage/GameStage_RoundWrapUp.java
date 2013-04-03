@@ -32,8 +32,6 @@ public class GameStage_RoundWrapUp extends GameStage {
       fa.recomputeScores();
     }
 
-
-
     game.rerankFarms();
 
     for (Farm fa:game.getFarms()){
@@ -49,5 +47,10 @@ public class GameStage_RoundWrapUp extends GameStage {
   public String getName() {
     // TODO Auto-generated method stub
     return "Round Wrap Up";
+  }
+  @Override
+  public boolean passThrough() {
+    // TODO Auto-generated method stub
+    return false;
   }
 }

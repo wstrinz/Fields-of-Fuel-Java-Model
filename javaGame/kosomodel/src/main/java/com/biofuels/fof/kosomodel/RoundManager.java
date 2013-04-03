@@ -50,7 +50,7 @@ public class RoundManager {
 
     }
 
-    if (nextStage.ShouldEnter()) {
+    if (nextStage.ShouldEnter() && !nextStage.passThrough()) {
       // exit old, set new, enter new
       mCurrentGameStage.Exit();
       mCurrentGameStage = nextStage;
