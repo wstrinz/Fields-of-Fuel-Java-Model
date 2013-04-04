@@ -169,9 +169,9 @@ public class Game {
 
     //FIXME Should not be running calculations twice, esp given concurrency issues
     for(Farm f:farms.values()){
-      f.setEconRank(envScores.size() - econScores.indexOf((double)f.getEconScore()));
-      f.setEnvRank(envScores.size() - envScores.indexOf(f.getEnvScore()));
-      f.setEnergyRank(envScores.size() - energyScores.indexOf(f.getEnergyScore()));
+      f.setEconRank(econScores.indexOf((double)f.getEconScore()) + 1);
+      f.setEnvRank(envScores.indexOf(f.getEnvScore()) + 1);
+      f.setEnergyRank(energyScores.indexOf(f.getEnergyScore()) + 1);
       //System.out.println("ene: " + f.getEnergyScore() + "env: " + f.getEnvScore() + "econ: " + f.getEconScore());
       f.setOverallScore((f.getEnergyScore() + f.getEnvScore() + f.getEconScore()) / 3);
       sustainabilityScores.add(f.getOverallScore());
