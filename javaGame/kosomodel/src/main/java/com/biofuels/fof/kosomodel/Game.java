@@ -180,7 +180,7 @@ public class Game {
     Collections.sort(sustainabilityScores);
 
     for(Farm f:farms.values()){
-      f.setOverallRank(sustainabilityScores.size() - sustainabilityScores.indexOf(f.getOverallScore()));
+      f.setOverallRank(sustainabilityScores.indexOf(f.getOverallScore()) + 1);
     }
   }
 
