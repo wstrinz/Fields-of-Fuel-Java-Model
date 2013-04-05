@@ -159,6 +159,7 @@ public class HandlerHelper {
         JSONObject farm = new JSONObject();
         farm.put("name", f.getName());
         farm.put("ready", f.isReady());
+        farm.put("rank", f.getOverallRank());
         //        list.add("\""+f.getName()+"\"");
         //        list.add(false);
         list.add(farm);
