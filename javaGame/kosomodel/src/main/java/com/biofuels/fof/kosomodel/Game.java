@@ -317,5 +317,13 @@ public class Game {
     return max;
   }
 
+  public void setWaitForModerator(String stage, boolean value) {
+    roundManager.setWaitForModerator(stage, value);
+  }
+
+  public boolean isWaitForModerator() {
+    return roundManager.isWaitForModerator();
+  }
+
 
 }

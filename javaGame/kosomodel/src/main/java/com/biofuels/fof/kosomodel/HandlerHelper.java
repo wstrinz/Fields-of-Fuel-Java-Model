@@ -19,11 +19,10 @@ public class HandlerHelper {
   private ActorRef handler;
 
   public HandlerHelper() {
-    // TODO Auto-generated constructor stub
+
   }
 
   public HandlerHelper(ActorRef listener, ActorRef handler) {
-    // TODO Auto-generated constructor stub
     this.listener = listener;
     this.handler = handler;
   }
@@ -44,7 +43,6 @@ public class HandlerHelper {
     String roomID = (String) eventObj.get("roomID");
     String farmerName = (String) eventObj.get("userName");
     String deviseName = (String) eventObj.get("deviseName");
-
     switch (eventObj.get("event").toString()){
 
     case "validateRoom":
@@ -196,7 +194,7 @@ public class HandlerHelper {
       Game g = games.get(roomID);
       g.getFarm(clientID).setReady(true);
       g.farmerReady();
-      if(g.getReadyFarmers() == g.getFarms().size())
+      if((g.getReadyFarmers() == g.getFarms().size()) && !g.isWaitForModerator())
         doAdvanceStage(roomID);
       break;
 
@@ -229,6 +227,10 @@ public class HandlerHelper {
 
     case "getLatestFieldHistory":
       this.sendLatestFieldHistory(clientID, roomID, clientID, ((Long)eventObj.get("field")).intValue());
+      break;
+
+    case "setWaitForModerator":
+      games.get(roomID).setWaitForModerator((String)eventObj.get("stage"), (boolean)eventObj.get("value"));
       break;
 
     /*case "getFieldHistorySequence":

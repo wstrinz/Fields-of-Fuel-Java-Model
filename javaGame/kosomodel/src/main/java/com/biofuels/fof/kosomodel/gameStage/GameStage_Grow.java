@@ -23,6 +23,6 @@ public class GameStage_Grow extends GameStage {
   @Override
   public boolean passThrough() {
     // TODO Auto-generated method stub
-    return true;
+    return false;
   }
 }

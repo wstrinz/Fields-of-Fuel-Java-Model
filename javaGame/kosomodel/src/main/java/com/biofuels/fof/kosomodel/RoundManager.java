@@ -98,4 +98,17 @@ public class RoundManager {
     mGameStageIterator = mGameStageSequence.iterator();
     AdvanceStage();
   }
+
+  public void setWaitForModerator(String stage, boolean value){
+    for(GameStage s:mGameStageSequence){
+      if(s.getName().equals(stage)){
+        s.setWaitForModerator(value);
+      }
+    }
+  }
+
+  public boolean isWaitForModerator() {
+    // TODO Auto-generated method stub
+    return mCurrentGameStage.getWaitForModerator();
+  }
 }

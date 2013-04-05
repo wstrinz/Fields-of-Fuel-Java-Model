@@ -12,6 +12,8 @@ import com.biofuels.fof.kosomodel.Game;
 public abstract class GameStage {
 //------------------------------------------------------------------------------
   protected Game game;
+  protected boolean waitForModerator;
+
   public GameStage(Game g){
     game = g;
   }
@@ -28,4 +30,12 @@ public abstract class GameStage {
   // Messages/Data/Events from client in JSON object format...
 //  public void HandleClientData(JsonNode data);
   public abstract void HandleClientData(JSONObject data);
+
+  public void setWaitForModerator(boolean wait){
+    waitForModerator = wait;
+  }
+
+  public boolean getWaitForModerator(){
+    return waitForModerator;
+  }
 }
