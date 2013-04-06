@@ -85,17 +85,17 @@ public class Field {
     int grassVal = this.crop == Crop.GRASS ? 1 : 0;
     int coverVal = (this.crop == Crop.COVER || this.crop == Crop.FALLOW) ? 1 : 0;
     int noTill = this.management.till ? 0 : 1;
-    int highFert = this.management.fertilize ? 0 : 1;
+    int highFert = this.management.fertilize ? 1 : 0;
 
     int MAXSOC = 190 ;
 
     double B0 = 0.2;
-    double B1 = 1.17; //0
-    double B2 = 1.04; //0
-    double B3 = 1.1; //0
+    double B1 = 0.17;
+    double B2 = 0.04;
+    double B3 = 0.1;
     double B4 = 0.2;
 
-    double r = /*1 + */((B0 * cornVal) + (B1 * grassVal) + (B2 * coverVal) + (B3 * noTill) - (B4 * highFert));
+    double r = 1 + ((B0 * cornVal) + (B1 * grassVal) + (B2 * coverVal) + (B3 * noTill) - (B4 * highFert));
     double delta = ((r-1)*(1 - (SOC/MAXSOC))) * SOC;
     SOC += delta;
 
