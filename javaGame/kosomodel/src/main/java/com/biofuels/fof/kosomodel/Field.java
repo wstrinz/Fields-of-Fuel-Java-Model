@@ -85,19 +85,22 @@ public class Field {
     int grassVal = this.crop == Crop.GRASS ? 1 : 0;
     int coverVal = (this.crop == Crop.COVER || this.crop == Crop.FALLOW) ? 1 : 0;
     int noTill = this.management.till ? 0 : 1;
+    int highFert = this.management.fertilize ? 0 : 1;
+
     int MAXSOC = 190 ;
 
-    double B0 = 0.8;
-    double B1 = 1.17;
-    double B2 = 1.04;
-    double B3 = 1.1;
+    double B0 = 0.2;
+    double B1 = 0.17;
+    double B2 = 0.04;
+    double B3 = 0.1;
+    double B4 = 0.2;
 
-    double r = ((B0 * cornVal) + (B1 * grassVal) + (B2 * coverVal) + (B3 * noTill));
+    double r = 1 + ((B0 * cornVal) + (B1 * grassVal) + (B2 * coverVal) + (B3 * noTill) + (B4 * highFert));
     double delta = ((r-1)*(1 - (SOC/MAXSOC))) * SOC;
     SOC += delta;
 
 
-    if (SOC > MAXSOC) //set max of 150 for now (note: not in official model spec)
+    if (SOC > MAXSOC)
       SOC = MAXSOC;
   }
 
@@ -134,12 +137,20 @@ public class Field {
     double B1Grass = 2.4093;
     double B1Cover = 2.40141;
 
+    double B2Corn = 1.1;
+    double B2Grass = 1.1;
+    double B2Cover = 0;
+
     int cornVal = this.getCrop() == Crop.CORN ? 1 : 0;
     int grassVal = this.getCrop() == Crop.GRASS ? 1 : 0;
     int coverVal = (this.getCrop() == Crop.COVER || this.getCrop() == Crop.FALLOW) ? 1 : 0;
+    int fertilizerVal = this.management.fertilize ? 0 : 1;
 
     double B0 = B0Corn * cornVal + B0Grass * grassVal + B0Cover * coverVal;
     double B1 = B1Corn * cornVal + B1Grass * grassVal + B1Cover * coverVal;
+    double B2 = B2Corn * cornVal + B2Grass * grassVal + B2Cover * coverVal;
+
+
 
     //Don't grow switchgrass on first year. leaving off since switchgrass yield doesn't grow over time.
     //TODO Should also add a get latest year method to history for conveniences
@@ -148,7 +159,7 @@ public class Field {
 //      B1 = 0;
 //    }
 
-    return B0 + B1 * Math.log(this.getSOC());
+    return B0 + B1 * Math.log(this.getSOC()) + B2 * fertilizerVal;
   }
 
 }
