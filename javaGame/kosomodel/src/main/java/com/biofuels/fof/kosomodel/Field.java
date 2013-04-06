@@ -95,7 +95,7 @@ public class Field {
     double B3 = 0.1;
     double B4 = 0.2;
 
-    double r = 1 + ((B0 * cornVal) + (B1 * grassVal) + (B2 * coverVal) + (B3 * noTill) - (B4 * highFert));
+    double r = 1 + (-(B0 * cornVal) + (B1 * grassVal) + (B2 * coverVal) + (B3 * noTill) - (B4 * highFert));
     double delta = ((r-1)*(1 - (SOC/MAXSOC))) * SOC;
     SOC += delta;
 
