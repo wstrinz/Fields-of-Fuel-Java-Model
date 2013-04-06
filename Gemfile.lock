@@ -4,6 +4,7 @@ GEM
     diff-lcs (1.2.1)
     json (1.7.7)
     json (1.7.7-java)
+    newrelic_rpm (3.6.0.78)
     rack (1.4.5)
     rack-protection (1.4.0)
       rack
@@ -28,6 +29,7 @@ PLATFORMS
 
 DEPENDENCIES
   json
+  newrelic_rpm
   redis
   rspec
   sinatra
