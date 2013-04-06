@@ -11,7 +11,7 @@ public class GameStage_Grow extends GameStage {
     super(g);
     // TODO Auto-generated constructor stub
   }
-  public boolean ShouldEnter() { return false; }
+  public boolean ShouldEnter() { return true; }
   public void Enter() {}
   public void Exit() {}
   public void HandleClientData(JSONObject data) {}
