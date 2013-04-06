@@ -57,5 +57,5 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="sun.cpu.isalist" value=""/>
   </properties>
-  <testcase time="0.002" classname="com.biofuels.fof.kosomodel.AppTest" name="testApp"/>
+  <testcase time="0.001" classname="com.biofuels.fof.kosomodel.AppTest" name="testApp"/>
 </testsuite>
