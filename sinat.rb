@@ -21,7 +21,7 @@ get '/start' do
     @@started_s = true
     "Started server. Don't go running this twice now..."
   else
-    "Server already started!"
+    "Server already started"
   end
 end
 
