@@ -8,3 +8,4 @@ gem 'sinatra'
 gem 'json'
 gem 'rspec'
 gem "json"
+gem 'newrelic_rpm'

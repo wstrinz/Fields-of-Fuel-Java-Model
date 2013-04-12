@@ -5,6 +5,10 @@ configure do
   @@started_s = false
 end
 
+configure :production do
+  require 'newrelic_rpm'
+end
+
 get '/' do
   "Biofuels Game Model Control \n If you just woke up the server, try '/start' to get the model running again"
 end
