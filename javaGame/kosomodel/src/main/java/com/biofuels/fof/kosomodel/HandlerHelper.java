@@ -85,6 +85,10 @@ public class HandlerHelper {
       sendMessage(buildJson(clientID.toString(), "globalJoinRoom","result",joinResult));
       break;
 
+    case "clearAllGames":
+      games.clear();
+      break;
+
     case "changeSettings":
       //replies.add(event);
       games.get(roomID).changeSettings(((Long)eventObj.get("fieldCount")).intValue(),
@@ -234,7 +238,7 @@ public class HandlerHelper {
       games.get(roomID).setWaitForModerator((String)eventObj.get("stage"), (boolean)eventObj.get("value"));
       break;
 
-    /*case "getFieldHistorySequence":
+      /*case "getFieldHistorySequence":
       this.sendFieldHistorySequence(clientID, roomID, clientID, (int) eventObj.get("year"));
       break;*/
 
@@ -312,7 +316,7 @@ public class HandlerHelper {
     replyAdvanceStage.put("stageName", roundName);
     replyAdvanceStage.put("year", year);
     replyAdvanceStage.put("clientID", roomID);
-    sendMessage(replyAdvanceStage.toJSONString());
+
 
 
 
@@ -340,7 +344,9 @@ public class HandlerHelper {
 
       }
       sendGetGameInfo(roomID, roomID);
+
     }
+    sendMessage(replyAdvanceStage.toJSONString());
   }
 
   private void sendMessage(String message) {
@@ -518,10 +524,11 @@ public class HandlerHelper {
     Field f = games.get(roomID).getFarm(clientID).getFields().get(field);
 
 
-      FieldHistory history = f.getHistory();
-      if(history == null){
-        System.out.println("history null!");
-      }
+    FieldHistory history = f.getHistory();
+    if(history == null){
+      System.out.println("history null!");
+    }
+    if(!history.getHistory().isEmpty()){
       FieldHistory.HistoryYear y = history.getHistory().getLast();
       JSONObject year = new JSONObject();
       year.put("year", y.year);
@@ -534,19 +541,20 @@ public class HandlerHelper {
       //seasons.add(year);
       fields.add(year);
 
-    reply.put("event", "getLatestFieldHistory");
-    reply.put("clientID", sendAddr);
-    reply.put("fields", fields);
-    reply.put("fieldNum", field);
-    sendMessage(reply.toJSONString());
+      reply.put("event", "getLatestFieldHistory");
+      reply.put("clientID", sendAddr);
+      reply.put("fields", fields);
+      reply.put("fieldNum", field);
+      sendMessage(reply.toJSONString());
+    }
   }
 
   @SuppressWarnings("unchecked")
   private void sendGetFarmerHistory(Integer clientID, String roomID, Object sendAddr){
-//
+    //
     Game game = games.get(roomID);
     Farm farm = game.getFarm(clientID);
-//    JSONArray years = new JSONArray();
+    //    JSONArray years = new JSONArray();
 
     for(FarmHistory.HistoryYear y: farm.getHistory()){
       JSONObject reply = new JSONObject();
@@ -575,7 +583,7 @@ public class HandlerHelper {
     }
 
 
-//    sendMessage(reply.toJSONString());
+    //    sendMessage(reply.toJSONString());
 
 
   }
@@ -585,29 +593,33 @@ public class HandlerHelper {
     JSONObject reply = new JSONObject();
     Game game = games.get(roomID);
     Farm farm = game.getFarm(clientID);
-    FarmHistory.HistoryYear y = farm.getHistory().getLast();
-    JSONObject year = new JSONObject();
-    year.put("year", y.year);
-    year.put("earnings", y.earnings);
-    year.put("soilSubscore", y.soilSubscore);
-    year.put("waterSubscore", y.waterSubscore);
-    year.put("sustainabilityScore", y.sustainabilityScore);
-    year.put("environmentScore", y.environmentScore);
-    year.put("switchgrassIncome", y.switchgrassIncome);
-    year.put("energyScore", y.energyScore);
-    year.put("economicsScore", y.economicsScore);
-    year.put("cornIncome", y.cornIncome);
-    year.put("switchgrassIncome", y.switchgrassIncome);
-    year.put("cornYield", y.cornYield);
-    year.put("grassYield", y.grassYield);
-    year.put("sustainabilityRank", y.sustainabilityRank);
-    year.put("economicsRank", y.economicsRank);
-    year.put("environmentRank", y.environmentRank);
-    year.put("energyRank", y.energyRank);
-    reply.put("event", "getLatestFarmerHistory");
-    reply.put("yearInfo", year);
-    reply.put("clientID", sendAddr);
-    sendMessage(reply.toJSONString());
+    if(!farm.getHistory().isEmpty()){
+      FarmHistory.HistoryYear y = farm.getHistory().getLast();
+      JSONObject year = new JSONObject();
+      year.put("year", y.year);
+      year.put("earnings", y.earnings);
+      year.put("soilSubscore", y.soilSubscore);
+      year.put("waterSubscore", y.waterSubscore);
+      year.put("sustainabilityScore", y.sustainabilityScore);
+      year.put("environmentScore", y.environmentScore);
+      year.put("switchgrassIncome", y.switchgrassIncome);
+      year.put("energyScore", y.energyScore);
+      year.put("economicsScore", y.economicsScore);
+      year.put("cornIncome", y.cornIncome);
+      year.put("switchgrassIncome", y.switchgrassIncome);
+      year.put("cornYield", y.cornYield);
+      year.put("grassYield", y.grassYield);
+      year.put("sustainabilityRank", y.sustainabilityRank);
+      year.put("economicsRank", y.economicsRank);
+      year.put("environmentRank", y.environmentRank);
+      year.put("energyRank", y.energyRank);
+      reply.put("yearInfo", year);
+
+      reply.put("event", "getLatestFarmerHistory");
+      reply.put("clientID", sendAddr);
+      sendMessage(reply.toJSONString());
+    }
+
   }
 
   @SuppressWarnings("unchecked")
