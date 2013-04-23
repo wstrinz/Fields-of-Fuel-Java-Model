@@ -59,6 +59,7 @@ class ServerWrapper
     loop do
       # puts str
       #   write_pipe(msg)
+
       if mode=="pipe"
         str = read_pipe
       else
@@ -119,9 +120,21 @@ class ServerWrapper
   end
 
   def do_akka(development)
+
     @development = development
     jside = ActorSystemHelper.new
     @system = ActorSystem.create("Biofuels")
+    at_exit do
+      puts "Shutting down #{@system}"
+      @system.shutdown()
+      @system.await_termination
+    end
+    # trap("INT") do
+    #     puts "interrupting cow!"
+    #     @system.shutdown()
+    #     @system.await_termination
+    #     Kernel.exit(0)
+    #   end
     # pro = Props.new(HandlerActor)
     @handler = jside.makenew(@system, Handler, "handler")  # = system.actorOf(pro, "counter")
     @listener = @system.actorOf(Props.new(ServerListener), "listener")

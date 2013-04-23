@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'json'
 
+
 configure do
   @@started_s = false
 end
@@ -8,6 +9,7 @@ end
 configure :production do
   require 'newrelic_rpm'
 end
+
 
 get '/' do
   "Biofuels Game Model Control \n If you just woke up the server, try '/start' to get the model running again"
@@ -20,6 +22,7 @@ end
 get '/start' do
   unless @@started_s
     Thread.new do
+
       puts load('load_akka.rb')
     end
     @@started_s = true
