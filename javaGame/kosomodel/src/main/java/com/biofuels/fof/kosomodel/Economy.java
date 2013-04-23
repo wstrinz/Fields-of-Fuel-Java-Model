@@ -6,7 +6,7 @@ public class Economy {
 	private int energyPerUnitCorn;
 	private int energyPerUnitGrass;
 	private int fixedCost;
-	private float variableAlpha;
+	private double variableAlpha;
 	public Economy(){
 		complex = true;
 	}
@@ -34,7 +34,7 @@ public class Economy {
 	public void setFixedCost(int fixedCost) {
 		this.fixedCost = fixedCost;
 	}
-	public float getVariableAlpha() {
+	public double getVariableAlpha() {
 		return variableAlpha;
 	}
 	public void setVariableAlpha(float variableAlpha) {
@@ -44,6 +44,24 @@ public class Economy {
 		return complex;
 	}
 	
+	public double computeQforP(int p, Crop crop){
+		int g;
+		if(crop == Crop.CORN)
+			g = energyPerUnitCorn;
+		else
+			g = energyPerUnitGrass;
+		
+		return Math.pow(((pEnergy * g - p)/(variableAlpha+1)),(1/variableAlpha));
+	}
+	
+	public double computePforQ(Integer q, Crop crop){
+		int g;
+		if(crop == Crop.CORN)
+			g = energyPerUnitCorn;
+		else
+			g = energyPerUnitGrass;
+		return ((pEnergy * g - Math.pow(q.doubleValue(), variableAlpha) - variableAlpha * Math.pow(q.doubleValue(), variableAlpha)));
+	}
 	
 
 }
