@@ -117,6 +117,7 @@ class ServerWrapper
     while (!(poppy = @red.bpop))
       sleep (60)
     end
+
   end
 
   def do_akka(development)
