@@ -169,9 +169,9 @@ public class Game {
 
     //FIXME Should not be running calculations twice, esp given concurrency issues
     for(Farm f:farms.values()){
-      f.setEconRank(econScores.indexOf((double)f.getEconScore()) + 1);
-      f.setEnvRank(envScores.indexOf(f.getEnvScore()) + 1);
-      f.setEnergyRank(energyScores.indexOf(f.getEnergyScore()) + 1);
+      f.setEconRank(econScores.size() - econScores.indexOf((double)f.getEconScore()));
+      f.setEnvRank(envScores.size() - envScores.indexOf(f.getEnvScore()));
+      f.setEnergyRank(energyScores.size() - energyScores.indexOf(f.getEnergyScore()));
       //System.out.println("ene: " + f.getEnergyScore() + "env: " + f.getEnvScore() + "econ: " + f.getEconScore());
       f.setOverallScore((f.getEnergyScore() + f.getEnvScore() + f.getEconScore()) / 3);
       sustainabilityScores.add(f.getOverallScore());
@@ -180,7 +180,7 @@ public class Game {
     Collections.sort(sustainabilityScores);
 
     for(Farm f:farms.values()){
-      f.setOverallRank(sustainabilityScores.indexOf(f.getOverallScore()) + 1);
+      f.setOverallRank(sustainabilityScores.size() - sustainabilityScores.indexOf(f.getOverallScore()));
     }
   }
 

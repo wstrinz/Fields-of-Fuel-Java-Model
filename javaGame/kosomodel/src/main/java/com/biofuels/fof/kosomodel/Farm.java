@@ -75,7 +75,8 @@ public class Farm {
   }
 
   public double calcEnergyScore() {
-    double EMAX = 210666.6;
+	//Recalculated (and rounded up for safety)
+	double EMAX = 226400; 
 
     //Energy is Mj per Mg (?)
     double energyKernel = 18800.0;
